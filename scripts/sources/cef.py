@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from scripts.parse_forecast_data import parse_forecast_csv
+from scripts.sources.base import AdapterResult
+
+
+def parse(path: Path, source_url: str) -> AdapterResult:
+    try:
+        parsed = parse_forecast_csv(path, source_url)
+        return AdapterResult(
+            ok=True,
+            payload={
+                "as_of_date": parsed.as_of_date,
+                "petrol_95_estimated_change_cents": parsed.petrol_95_estimated_change_cents,
+                "direction": parsed.direction,
+                "confidence": parsed.confidence,
+                "source_url": parsed.source_url,
+            },
+            source_url=source_url,
+            path=path,
+        )
+    except Exception as exc:
+        return AdapterResult(ok=False, payload=None, error=str(exc), source_url=source_url, path=path)

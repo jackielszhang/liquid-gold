@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "last_updated": "2026-07-07T09:33:43Z",
+  "status": "ok",
+  "manual_override": false,
+  "next_adjustment_date": "2026-08-05",
+  "source_status": {
+    "official_prices": "ok",
+    "forecast": "ok"
+  },
+  "prices": {
+    "petrol_95": {
+      "coastal_cents_per_litre": 2523,
+      "inland_cents_per_litre": 2587,
+      "effective_date": "2026-07-01"
+    },
+    "petrol_93": {
+      "coastal_cents_per_litre": 2515,
+      "inland_cents_per_litre": 2579,
+      "effective_date": "2026-07-01"
+    }
+  },
+  "forecast": {
+    "as_of_date": "2026-07-07",
+    "petrol_95_estimated_change_cents": -80,
+    "direction": "down",
+    "confidence": "high",
+    "source_url": "forecast-sample.csv"
+  },
+  "recommendation": {
+    "action": "wait",
+    "headline": "Likely cheaper next month",
+    "body": "Top up only if you need to.",
+    "reason": "Petrol 95 is currently estimated to decrease by about 80c/L."
+  },
+  "sources": {
+    "official_prices_url": "official-price-sample.html",
+    "forecast_url": "forecast-sample.csv",
+    "validation_url": "secondary-source-sample.txt"
+  }
+}
