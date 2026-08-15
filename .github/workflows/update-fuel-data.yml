@@ -1,3 +1,5 @@
+# Refresh public/fuel-data.json once a day so the iOS app can fetch raw GitHub.
+# 06:15 UTC is early enough for SA morning widgets without racing source sites.
 name: Update fuel data
 
 on:

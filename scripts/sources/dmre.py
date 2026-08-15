@@ -1,3 +1,5 @@
+"""Department of Mineral Resources and Energy official-price adapter."""
+
 from __future__ import annotations
 
 from pathlib import Path

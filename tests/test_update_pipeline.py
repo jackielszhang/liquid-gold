@@ -1,3 +1,5 @@
+"""History must grow without mutating the previous published payload."""
+
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -11,9 +13,12 @@ class UpdatePipelineTests(unittest.TestCase):
     def test_history_appends_snapshot(self) -> None:
         dataset = {
             "last_updated": "2026-07-07T00:00:00Z",
-            "prices": {"petrol_95": {"coastal_cents_per_litre": 2523, "inland_cents_per_litre": 2587}},
-            "forecast": {"petrol_95_estimated_change_cents": -80},
-            "recommendation": {"action": "wait"},
+            "prices": {
+                "petrol_95": {"coastal_cents_per_litre": 2523, "inland_cents_per_litre": 2587},
+                "diesel_50ppm": {"coastal_cents_per_litre": 2345, "inland_cents_per_litre": 2410},
+            },
+            "forecast": {"petrol_95_estimated_change_cents": -80, "diesel_50ppm_estimated_change_cents": 55},
+            "recommendation": {"petrol_95": {"action": "wait"}, "diesel_50ppm": {"action": "fill_now"}},
         }
         with tempfile.TemporaryDirectory() as tmp:
             history_path = Path(tmp) / "history.json"
@@ -21,6 +26,7 @@ class UpdatePipelineTests(unittest.TestCase):
             append_history(history_path, dataset)
             history = json.loads(history_path.read_text(encoding="utf-8"))
             self.assertEqual(len(history), 1)
+            self.assertEqual(history[0]["recommendation"]["petrol_95"], "wait")
 
     def test_previous_payload_is_untouched_on_failure_path(self) -> None:
         previous = {"status": "ok"}

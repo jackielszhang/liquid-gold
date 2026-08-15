@@ -1,3 +1,10 @@
+"""Build and publish public/fuel-data.json for the iOS app and widget.
+
+This is the only pipeline entrypoint that GitHub Actions runs. Official prices
+must parse or the run fails, so a last-known-good payload is never overwritten.
+Forecasts can fail: we keep a recent previous forecast, then degrade to unknown.
+"""
+
 from __future__ import annotations
 
 import json
@@ -21,6 +28,10 @@ PUBLIC_DIR = ROOT / "public"
 RAW_DIR = ROOT / "data" / "raw"
 FIXTURES_DIR = ROOT / "data" / "fixtures"
 
+# The app only offers these two grades. Petrol 93 may still appear in source
+# files, but publishing it would imply the product supports it.
+SUPPORTED_FUELS = {"petrol_95", "diesel_50ppm"}
+
 
 def load_json(path: Path, default):
     if not path.exists():
@@ -34,6 +45,8 @@ def write_json(path: Path, payload) -> None:
 
 
 def next_adjustment_date(today: date) -> str:
+    # SA regulated fuel prices usually change on the first Wednesday of the
+    # month. Computing that date locally beats scraping a calendar page.
     month = today.month + 1
     year = today.year
     if month == 13:
@@ -64,19 +77,40 @@ def _download_or_fixture(url: str | None, bucket: str) -> Path:
 
 
 def _merge_forecast(candidate: dict, previous: dict | None) -> dict:
-    if candidate.get("petrol_95_estimated_change_cents") is not None:
+    # A live forecast can be blank on a bad scrape. Reuse yesterday's values
+    # for two days, then drop them so the app does not keep waiting on stale
+    # cents that no longer belong to this review period.
+    if any(candidate.get(key) is not None for key in ("petrol_95_estimated_change_cents", "diesel_50ppm_estimated_change_cents")):
         return candidate
+
     previous_forecast = (previous or {}).get("forecast", {})
     if previous_forecast.get("as_of_date"):
         age = (date.today() - datetime.strptime(previous_forecast["as_of_date"], "%Y-%m-%d").date()).days
         if age < 3:
             return deepcopy(previous_forecast)
+
     return {
         "petrol_95_estimated_change_cents": None,
+        "diesel_50ppm_estimated_change_cents": None,
         "direction": "unknown",
+        "diesel_50ppm_direction": "unknown",
         "confidence": "unknown",
         "as_of_date": None,
     }
+
+
+def _build_recommendations(dataset: dict) -> dict[str, dict]:
+    recommendations: dict[str, dict] = {}
+    for fuel_key, prices in dataset["prices"].items():
+        if fuel_key not in SUPPORTED_FUELS:
+            continue
+        recommendations[fuel_key] = calculate_recommendation(
+            fuel_key=fuel_key,
+            current_prices=prices,
+            forecast=dataset["forecast"],
+            next_adjustment_date=dataset["next_adjustment_date"],
+        )
+    return recommendations
 
 
 def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
@@ -111,7 +145,11 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
             "official_prices": "ok" if official_result.ok else "error",
             "forecast": "ok" if forecast_result.ok else "error",
         },
-        "prices": official_result.payload["prices"],
+        "prices": {
+            fuel_key: prices
+            for fuel_key, prices in official_result.payload["prices"].items()
+            if fuel_key in SUPPORTED_FUELS
+        },
         "forecast": _merge_forecast(forecast_payload, previous),
         "recommendation": {},
         "sources": {
@@ -122,20 +160,27 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
     }
     for values in dataset["prices"].values():
         values["effective_date"] = official_result.payload["effective_date"]
-    dataset["recommendation"] = calculate_recommendation(dataset["forecast"])
+    dataset["recommendation"] = _build_recommendations(dataset)
     return dataset, logs
 
 
 def apply_manual_override(dataset: dict, override: dict) -> dict:
     if not override.get("enabled"):
         return dataset
+
+    # Override is a last-resort operator tool: parsers still run, then this
+    # swap wins so a broken source does not stall a known-correct price.
     merged = deepcopy(dataset)
     if override.get("prices"):
-        merged["prices"] = override["prices"]
+        merged["prices"] = {
+            fuel_key: prices
+            for fuel_key, prices in override["prices"].items()
+            if fuel_key in SUPPORTED_FUELS
+        }
     if override.get("forecast"):
         merged["forecast"].update(override["forecast"])
     merged["manual_override"] = True
-    merged["recommendation"] = calculate_recommendation(merged["forecast"])
+    merged["recommendation"] = _build_recommendations(merged)
     return merged
 
 
@@ -146,9 +191,11 @@ def append_history(history_path: Path, dataset: dict) -> None:
             "last_updated": dataset["last_updated"],
             "prices": dataset["prices"],
             "forecast": dataset["forecast"],
-            "recommendation": dataset["recommendation"]["action"],
+            "recommendation": {fuel_key: value["action"] for fuel_key, value in dataset["recommendation"].items()},
         }
     )
+    # Keep ~three months so we can debug "was this a one-off scrape?" without
+    # letting history.json grow forever.
     write_json(history_path, history[-90:])
 
 
@@ -169,6 +216,7 @@ def main() -> int:
             print(line)
         return 0
     except Exception as exc:
+        # Any failure leaves the previous public JSON in place.
         print(str(exc), file=sys.stderr)
         return 1
 

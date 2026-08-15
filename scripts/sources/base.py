@@ -1,3 +1,9 @@
+"""Shared result shape for source adapters.
+
+Adapters catch their own parse errors so one broken feed can fail softly while
+another still contributes to the dataset.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

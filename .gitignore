@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Swift / Xcode
+.build/
+.cache/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcresult
+
+# Local noise
+.DS_Store
+tmp/
+.codex/

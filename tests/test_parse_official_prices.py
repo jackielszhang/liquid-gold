@@ -1,3 +1,5 @@
+"""Official prices are label-matched and stored as integer cents/L."""
+
 from pathlib import Path
 import unittest
 
@@ -10,6 +12,7 @@ class ParseOfficialPricesTests(unittest.TestCase):
         parsed = parse_official_prices_text(fixture, "fixture")
         self.assertEqual(parsed.prices["petrol_95"]["coastal_cents_per_litre"], 2523)
         self.assertEqual(parsed.prices["petrol_93"]["inland_cents_per_litre"], 2579)
+        self.assertEqual(parsed.prices["diesel_50ppm"]["inland_cents_per_litre"], 2410)
 
     def test_normalizes_common_decimal_formats(self) -> None:
         self.assertEqual(normalize_price_to_cents("25.23"), 2523)

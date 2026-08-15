@@ -1,3 +1,9 @@
+"""Automobile Association adapter.
+
+v1 only stores a snippet. The pipeline still downloads it so a later
+cross-check can land without changing update_fuel_data.py's source list.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

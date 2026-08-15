@@ -1,3 +1,9 @@
+"""Download source files without letting a dead URL kill the pipeline.
+
+GitHub Actions should still produce a dataset on a fresh clone, so a missing
+or unreachable URL is treated as "use the fixture" rather than an exception.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

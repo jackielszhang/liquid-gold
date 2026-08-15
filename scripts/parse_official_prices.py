@@ -1,3 +1,9 @@
+"""Extract coastal/inland prices from an official DMRE-style notice.
+
+Matching is label-based on purpose. Table column order changes whenever a
+department restyles a PDF; "Petrol 95" next to two numbers is more stable.
+"""
+
 from __future__ import annotations
 
 import re
@@ -7,7 +13,7 @@ from pathlib import Path
 
 
 PRICE_RE = re.compile(
-    r"(?P<label>petrol\s*95|95\s*ulp|petrol\s*93|93\s*ulp).*?"
+    r"(?P<label>petrol\s*95|95\s*ulp|petrol\s*93|93\s*ulp|diesel\s*50\s*ppm|50\s*ppm\s*diesel).*?"
     r"(?P<coastal>\d{1,4}(?:[.,]\d{1,2})?)\D+"
     r"(?P<inland>\d{1,4}(?:[.,]\d{1,2})?)",
     re.IGNORECASE | re.DOTALL,
@@ -31,10 +37,14 @@ def normalize_price_to_cents(raw: str) -> int:
         text = text.replace(",", "")
     elif "," in text:
         text = text.replace(",", ".")
+
     try:
         value = Decimal(text)
     except InvalidOperation as exc:
         raise ValueError(f"invalid price {raw!r}") from exc
+
+    # Notices mix "25.23" (rands) and "2523.0" (cents). Anything already over
+    # 1000 cannot be rands-per-litre in this market, so treat it as cents.
     if value > 1000:
         return int(value.quantize(Decimal("1")))
     return int((value * 100).quantize(Decimal("1")))
@@ -59,11 +69,15 @@ def parse_official_prices_text(text: str, source_url: str) -> OfficialPrices:
     prices: dict[str, dict[str, int | str]] = {}
     for match in PRICE_RE.finditer(text):
         label = match.group("label").lower()
-        key = "petrol_95" if "95" in label else "petrol_93"
+        if "diesel" in label:
+            key = "diesel_50ppm"
+        else:
+            key = "petrol_95" if "95" in label else "petrol_93"
         prices[key] = {
             "coastal_cents_per_litre": normalize_price_to_cents(match.group("coastal")),
             "inland_cents_per_litre": normalize_price_to_cents(match.group("inland")),
         }
+
     date_match = DATE_RE.search(text)
     effective_date = date_match.group(1) if date_match else None
     return OfficialPrices(

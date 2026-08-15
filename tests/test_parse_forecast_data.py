@@ -1,3 +1,5 @@
+"""Forecast parsing uses the latest CSV row as the current cents estimate."""
+
 from pathlib import Path
 import unittest
 
@@ -8,6 +10,7 @@ class ParseForecastTests(unittest.TestCase):
     def test_parse_csv_fixture(self) -> None:
         parsed = parse_forecast_csv(Path("data/fixtures/forecast-sample.csv"), "fixture")
         self.assertEqual(parsed.petrol_95_estimated_change_cents, -80)
+        self.assertEqual(parsed.diesel_50ppm_estimated_change_cents, 55)
         self.assertEqual(parsed.direction, "down")
 
 

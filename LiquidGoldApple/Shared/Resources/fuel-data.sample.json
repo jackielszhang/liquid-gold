@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "last_updated": "2026-08-15T22:53:22Z",
+  "last_updated": "2026-07-08T21:35:16Z",
   "status": "ok",
   "manual_override": false,
-  "next_adjustment_date": "2026-09-02",
+  "next_adjustment_date": "2026-08-05",
   "source_status": {
     "official_prices": "ok",
     "forecast": "ok"
@@ -26,7 +26,7 @@
     "diesel_50ppm_estimated_change_cents": 55,
     "direction": "down",
     "diesel_50ppm_direction": "up",
-    "confidence": "low",
+    "confidence": "high",
     "source_url": "forecast-sample.csv"
   },
   "recommendation": {
@@ -35,7 +35,7 @@
       "headline": "Wait if you can",
       "body": "A lower price is currently estimated for the next adjustment.",
       "reason": "Petrol 95 is currently estimated to decrease by about 80c/L.",
-      "best_fill_up_date": "2026-09-02",
+      "best_fill_up_date": "2026-08-05",
       "next_price_cents_per_litre": {
         "coastal_cents_per_litre": 2443,
         "inland_cents_per_litre": 2507
@@ -47,7 +47,7 @@
       "headline": "Fill before the next change",
       "body": "A higher price is currently estimated for the next adjustment.",
       "reason": "Diesel 50ppm is currently estimated to increase by about 55c/L.",
-      "best_fill_up_date": "2026-09-01",
+      "best_fill_up_date": "2026-08-04",
       "next_price_cents_per_litre": {
         "coastal_cents_per_litre": 2400,
         "inland_cents_per_litre": 2465
