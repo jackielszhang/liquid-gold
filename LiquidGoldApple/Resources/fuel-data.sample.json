@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "last_updated": "2026-07-08T21:35:16Z",
+  "last_updated": "2026-07-08T20:27:06Z",
   "status": "ok",
   "manual_override": false,
   "next_adjustment_date": "2026-08-05",
@@ -12,6 +12,11 @@
     "petrol_95": {
       "coastal_cents_per_litre": 2523,
       "inland_cents_per_litre": 2587,
+      "effective_date": "2026-07-01"
+    },
+    "petrol_93": {
+      "coastal_cents_per_litre": 2515,
+      "inland_cents_per_litre": 2579,
       "effective_date": "2026-07-01"
     },
     "diesel_50ppm": {
@@ -32,8 +37,8 @@
   "recommendation": {
     "petrol_95": {
       "action": "wait",
-      "headline": "Wait if you can",
-      "body": "A lower price is currently estimated for the next adjustment.",
+      "headline": "Likely cheaper next month",
+      "body": "Top up only if you need to.",
       "reason": "Petrol 95 is currently estimated to decrease by about 80c/L.",
       "best_fill_up_date": "2026-08-05",
       "next_price_cents_per_litre": {
@@ -44,8 +49,8 @@
     },
     "diesel_50ppm": {
       "action": "fill_now",
-      "headline": "Fill before the next change",
-      "body": "A higher price is currently estimated for the next adjustment.",
+      "headline": "Likely more expensive next month",
+      "body": "Fill up before the next adjustment.",
       "reason": "Diesel 50ppm is currently estimated to increase by about 55c/L.",
       "best_fill_up_date": "2026-08-04",
       "next_price_cents_per_litre": {

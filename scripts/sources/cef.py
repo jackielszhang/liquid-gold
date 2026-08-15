@@ -14,7 +14,9 @@ def parse(path: Path, source_url: str) -> AdapterResult:
             payload={
                 "as_of_date": parsed.as_of_date,
                 "petrol_95_estimated_change_cents": parsed.petrol_95_estimated_change_cents,
+                "diesel_50ppm_estimated_change_cents": parsed.diesel_50ppm_estimated_change_cents,
                 "direction": parsed.direction,
+                "diesel_50ppm_direction": parsed.diesel_50ppm_direction,
                 "confidence": parsed.confidence,
                 "source_url": parsed.source_url,
             },

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How petrol table prices are taken and used</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --bg: #f5f1f4;
+      --bg-2: #e8e3e5;
+      --ink: #121214;
+      --muted: #56545a;
+      --faint: #89858b;
+      --lcd: #d5d0b7;
+      --lcd-dark: #24261f;
+      --signal: #ff4a19;
+      --signal-muted: #ffe0d5;
+      --signal-dark: #a9270b;
+      --ok: #2d6a4f;
+      --ok-muted: #d8eee3;
+      --border: #121214;
+      --faint-border: #12121426;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% -10%, rgba(255, 74, 25, 0.12), transparent 38%),
+        linear-gradient(180deg, #faf7f9 0%, var(--bg) 100%);
+      font-family: Inter, sans-serif;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 36px 20px 80px;
+    }
+
+    .kicker,
+    .chip,
+    .step-num,
+    nav a {
+      font-family: "Chakra Petch", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--signal-dark);
+    }
+
+    h1, h2, h3 {
+      font-family: "Chakra Petch", sans-serif;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      max-width: 14ch;
+    }
+
+    h2 {
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .lede {
+      max-width: 62ch;
+      margin-top: 16px;
+      font-size: 1.05rem;
+      color: var(--ink);
+    }
+
+    .panel {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 5px 5px 0 var(--border);
+    }
+
+    header.panel {
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12px;
+      background: white;
+      transition: transform 160ms var(--ease-out), background 160ms ease, box-shadow 160ms var(--ease-out);
+    }
+
+    nav a:hover {
+      background: var(--signal-muted);
+      transform: translate(-2px, -2px);
+      box-shadow: 3px 3px 0 var(--border);
+    }
+
+    .callout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      padding: 18px 20px;
+      margin: 18px 0 28px;
+      background: var(--lcd);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .callout i { font-size: 28px; color: var(--signal-dark); }
+
+    .callout strong { color: var(--ink); }
+
+    /* Pipeline */
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin: 22px 0 36px;
+    }
+
+    .step {
+      padding: 16px 14px 14px;
+      background: white;
+      min-height: 148px;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 12px;
+      background: var(--ink);
+      color: white;
+      font-size: 12px;
+    }
+
+    .step p { margin-top: 8px; font-size: 0.88rem; }
+
+    .step.use { background: var(--signal-muted); }
+
+    /* Sample table */
+    .split {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      margin: 18px 0 32px;
+    }
+
+    .sample,
+    .code {
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 13px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--faint-border);
+    }
+
+    th {
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    tr.match { background: #fff4ee; }
+
+    tr.drop { opacity: 0.45; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+    }
+
+    .chip.keep { background: var(--ok-muted); }
+    .chip.drop { background: #eee; }
+
+    .code pre {
+      margin: 14px 0 0;
+      overflow-x: auto;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .hl { background: #ffd8cc; padding: 0 3px; }
+    .hl-num { background: #cfe8dc; padding: 0 3px; }
+    .hl-date { background: #f3e6a6; padding: 0 3px; }
+
+    /* Scan the line */
+    .scan {
+      margin: 18px 0 32px;
+      padding: 20px;
+      background: white;
+    }
+
+    .scan-line {
+      margin-top: 16px;
+      padding: 16px 18px;
+      background: var(--lcd-dark);
+      color: var(--lcd);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: clamp(14px, 2.4vw, 18px);
+      letter-spacing: -0.03em;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .scan-line .tag { color: #ff9a7a; }
+    .scan-line .num { color: #9ee0bb; }
+    .scan-line .rest { opacity: 0.55; }
+
+    .scan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .scan-card {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+    }
+
+    .scan-card small {
+      display: block;
+      font-family: "Chakra Petch", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 11px;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+
+    .scan-card strong {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 18px;
+    }
+
+    /* Regex anatomy */
+    .regex {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 32px;
+    }
+
+    .regex-line {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      background: white;
+    }
+
+    .token {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      background: var(--lcd-dark);
+      color: var(--lcd);
+      border-radius: 4px;
+    }
+
+    /* Cents */
+    .math {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0 0;
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    .math .box {
+      padding: 14px 16px;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 18px;
+    }
+
+    .math .arrow {
+      color: var(--signal);
+      font-size: 22px;
+    }
+
+    .math .note {
+      width: 100%;
+      font-family: Inter, sans-serif;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    /* Use */
+    .use-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin: 18px 0 32px;
+    }
+
+    .use-card {
+      padding: 18px;
+      background: white;
+    }
+
+    .use-card i {
+      font-size: 26px;
+      color: var(--signal);
+      margin-bottom: 10px;
+    }
+
+    .use-card p { margin-top: 8px; font-size: 0.92rem; }
+
+    .lcd-readout {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: var(--lcd-dark);
+      color: var(--lcd);
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: -0.04em;
+      border-radius: 4px;
+    }
+
+    .lcd-readout small {
+      display: block;
+      opacity: 0.6;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .files {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 18px 0 32px;
+    }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 14px 16px;
+      background: white;
+    }
+
+    .file-row i { color: var(--signal); font-size: 22px; }
+
+    .file-row code {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12.5px;
+      color: var(--ink);
+    }
+
+    .warns {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 0;
+    }
+
+    .warn {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 14px 16px;
+      background: white;
+    }
+
+    .warn i { color: var(--signal); font-size: 22px; }
+
+    .warn p { margin-top: 4px; }
+
+    footer {
+      margin-top: 36px;
+      color: var(--faint);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 920px) {
+      .pipeline,
+      .split,
+      .use-grid,
+      .files,
+      .scan-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .regex-line {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      nav a { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="panel">
+      <p class="kicker"><i class="ph ph-gas-pump"></i> Liquid Gold data pipeline</p>
+      <h1>How petrol table prices are taken and used</h1>
+      <p class="lede">
+        The app does not crawl petrol stations. It downloads the official South African
+        fuel-price notice, pulls the coastal and inland numbers off that document, stores
+        them as cents per litre, then uses those numbers plus a separate forecast to tell
+        you whether to fill now or wait.
+      </p>
+      <nav>
+        <a href="#taken"><i class="ph ph-download-simple"></i> How it is taken</a>
+        <a href="#parsed"><i class="ph ph-magnifying-glass"></i> How it is parsed</a>
+        <a href="#used"><i class="ph ph-device-mobile"></i> How it is used</a>
+        <a href="#guards"><i class="ph ph-shield-check"></i> Safety nets</a>
+      </nav>
+    </header>
+
+    <div class="callout">
+      <i class="ph ph-info"></i>
+      <p>
+        <strong>Important:</strong> this is not a web-table scraper.
+        It does not walk HTML <code>&lt;table&gt;</code> rows.
+        It flattens the official file into text, then hunts for labels like
+        <strong>Petrol 95</strong> followed by two numbers. Coastal is first. Inland is second.
+      </p>
+    </div>
+
+    <!-- The whole trip -->
+    <section>
+      <h2>The whole trip in six steps</h2>
+      <p>Every daily run follows the same path. If any required price is missing, the old published file is left untouched.</p>
+
+      <div class="pipeline">
+        <article class="panel step">
+          <span class="step-num">1</span>
+          <h3>Fetch</h3>
+          <p>GitHub Actions runs <code>update_fuel_data.py</code>. It tries <code>OFFICIAL_PRICES_URL</code>.</p>
+        </article>
+        <article class="panel step">
+          <span class="step-num">2</span>
+          <h3>Fallback</h3>
+          <p>No URL, or the download fails? Use the local fixture HTML instead of crashing.</p>
+        </article>
+        <article class="panel step">
+          <span class="step-num">3</span>
+          <h3>Extract</h3>
+          <p>HTML/TXT is read as text. A PDF is stripped with pypdf. Layout is discarded.</p>
+        </article>
+        <article class="panel step">
+          <span class="step-num">4</span>
+          <h3>Match</h3>
+          <p>A regex finds fuel labels and the next two numbers: coastal, then inland.</p>
+        </article>
+        <article class="panel step">
+          <span class="step-num">5</span>
+          <h3>Publish</h3>
+          <p>Only Petrol 95 and Diesel 50ppm survive. Written to <code>public/fuel-data.json</code>.</p>
+        </article>
+        <article class="panel step use">
+          <span class="step-num">6</span>
+          <h3>Show</h3>
+          <p>The iOS app fetches that JSON and converts cents into R/L for the widget.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Who owns which file -->
+    <section>
+      <h2>Which files do the work</h2>
+      <p>If a number looks wrong, start with the parser. If a number never arrived, start with the fetch.</p>
+
+      <div class="files">
+        <article class="panel file-row">
+          <i class="ph ph-cloud-arrow-down"></i>
+          <div>
+            <h3>Download</h3>
+            <p><code>scripts/fetch_sources.py</code> saves the file into <code>data/raw/</code>, or returns nothing on timeout.</p>
+          </div>
+        </article>
+        <article class="panel file-row">
+          <i class="ph ph-buildings"></i>
+          <div>
+            <h3>Official adapter</h3>
+            <p><code>scripts/sources/dmre.py</code> is a thin wrapper. DMRE is the department that publishes the official schedule.</p>
+          </div>
+        </article>
+        <article class="panel file-row">
+          <i class="ph ph-regex"></i>
+          <div>
+            <h3>Price parser</h3>
+            <p><code>scripts/parse_official_prices.py</code> is the actual “table scrape”: labels, two numbers, cents.</p>
+          </div>
+        </article>
+        <article class="panel file-row">
+          <i class="ph ph-flow-arrow"></i>
+          <div>
+            <h3>Orchestrator</h3>
+            <p><code>scripts/update_fuel_data.py</code> glues fetch + parse + forecast + validation + publish.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Taken -->
+    <section id="taken">
+      <h2>How the table is taken</h2>
+      <p>
+        The daily job does not browse a website. It downloads one file: whatever
+        <code>OFFICIAL_PRICES_URL</code> points at. HTML, TXT, or PDF all work.
+      </p>
+
+      <div class="split">
+        <article class="panel sample">
+          <h3>Download, then keep a copy</h3>
+          <p style="margin-top: 10px;">
+            If the env var is set, the file is saved into <code>data/raw/</code>.
+            That copy is useful when a later run fails: you can still inspect what arrived.
+          </p>
+          <p style="margin-top: 10px;">
+            If the env var is empty or the request times out (30 seconds), the pipeline
+            quietly switches to <code>data/fixtures/official-price-sample.html</code>.
+            That is why a fresh clone still produces a JSON file.
+          </p>
+          <p style="margin-top: 10px;">
+            GitHub Actions schedules this at <strong>06:15 UTC</strong> every day,
+            then commits <code>public/fuel-data.json</code> if anything changed.
+            You can also trigger it by hand.
+          </p>
+        </article>
+        <article class="panel code">
+          <h3>What “the table” looks like today</h3>
+          <p style="margin-top: 10px;">The fixture is not a real HTML table. It is just labelled lines:</p>
+          <pre>&lt;h1&gt;Fuel price schedule effective <span class="hl-date">2026-07-01</span>&lt;/h1&gt;
+&lt;p&gt;<span class="hl">Petrol 95</span> Coastal <span class="hl-num">25.23</span> Inland <span class="hl-num">25.87</span>&lt;/p&gt;
+&lt;p&gt;<span class="hl">Petrol 93</span> Coastal 25,15 Inland 25,79&lt;/p&gt;
+&lt;p&gt;<span class="hl">Diesel 50ppm</span> Coastal 23.45 Inland 24.10&lt;/p&gt;</pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- Parsed -->
+    <section id="parsed">
+      <h2>How those numbers are pulled out</h2>
+      <p>
+        Owner: <code>scripts/parse_official_prices.py</code>.
+        The parser never cares which column a number sat in. It only cares about
+        the words sitting in front of the numbers.
+      </p>
+
+      <article class="panel scan">
+        <h3>One line, scanned left to right</h3>
+        <p style="margin-top: 8px;">Take the Petrol 95 line. The regex grabs three pieces and ignores the rest.</p>
+        <div class="scan-line">
+          <span class="tag">Petrol 95</span>
+          <span class="rest"> Coastal </span>
+          <span class="num">25.23</span>
+          <span class="rest"> Inland </span>
+          <span class="num">25.87</span>
+        </div>
+        <div class="scan-grid">
+          <div class="scan-card">
+            <small>1. Label → key</small>
+            <strong>petrol_95</strong>
+          </div>
+          <div class="scan-card">
+            <small>2. First number → coastal</small>
+            <strong>25.23 → 2523c</strong>
+          </div>
+          <div class="scan-card">
+            <small>3. Second number → inland</small>
+            <strong>25.87 → 2587c</strong>
+          </div>
+        </div>
+      </article>
+
+      <div class="regex">
+        <article class="panel regex-line">
+          <span class="token">label</span>
+          <p>Look for <code>Petrol 95</code>, <code>95 ULP</code>, <code>Petrol 93</code>, <code>93 ULP</code>, or <code>Diesel 50 ppm</code>. Spacing and case do not matter.</p>
+        </article>
+        <article class="panel regex-line">
+          <span class="token">coastal</span>
+          <p>The first number after the label is coastal. Accepts <code>25.23</code>, <code>25,23</code>, or already-cents values like <code>2523.0</code>.</p>
+        </article>
+        <article class="panel regex-line">
+          <span class="token">inland</span>
+          <p>The second number is inland. Same formats. Then the match is stored under a fuel key.</p>
+        </article>
+        <article class="panel regex-line">
+          <span class="token">date</span>
+          <p>A second, looser regex grabs the first date it sees, such as <code>2026-07-01</code>. That becomes <code>effective_date</code>.</p>
+        </article>
+      </div>
+
+      <div class="split">
+        <article class="panel sample">
+          <h3>What gets kept</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Label found</th>
+                <th>Stored as</th>
+                <th>Published?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="match">
+                <td>Petrol 95</td>
+                <td>petrol_95</td>
+                <td><span class="chip keep"><i class="ph ph-check"></i> yes</span></td>
+              </tr>
+              <tr class="match drop">
+                <td>Petrol 93</td>
+                <td>petrol_93</td>
+                <td><span class="chip drop"><i class="ph ph-x"></i> parsed, then dropped</span></td>
+              </tr>
+              <tr class="match">
+                <td>Diesel 50ppm</td>
+                <td>diesel_50ppm</td>
+                <td><span class="chip keep"><i class="ph ph-check"></i> yes</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 14px;">
+            <code>SUPPORTED_FUELS</code> in the updater is only
+            <code>petrol_95</code> and <code>diesel_50ppm</code>.
+            Petrol 93 is parsed because the regex can see it, but the published
+            contract the app reads does not include it.
+          </p>
+        </article>
+        <article class="panel sample">
+          <h3>Rands become cents</h3>
+          <p style="margin-top: 10px;">
+            Apps hate floating point for money. The parser always stores integer cents.
+          </p>
+          <div class="math">
+            <div class="box">25.23</div>
+            <span class="arrow">→</span>
+            <div class="box">× 100</div>
+            <span class="arrow">→</span>
+            <div class="box">2523</div>
+            <p class="note">
+              Rule: if the number is already bigger than 1000, treat it as cents and leave it.
+              So <code>2523.0</code> stays <code>2523</code>. A comma like <code>25,23</code>
+              is treated as a decimal, not a thousands separator — unless both a comma and a
+              dot are present, in which case the comma is stripped.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Used -->
+    <section id="used">
+      <h2>How those prices are used</h2>
+      <p>
+        Scraping is only the input. The thing the phone actually shows is a recommendation
+        built from official prices plus a <em>separate</em> forecast feed (CEF), not from this table.
+      </p>
+
+      <div class="use-grid">
+        <article class="panel use-card">
+          <i class="ph ph-file-json"></i>
+          <h3>1. JSON contract</h3>
+          <p>
+            After validation, prices land in <code>public/fuel-data.json</code>.
+            History of the last 90 successful runs is appended to
+            <code>public/fuel-data-history.json</code>.
+          </p>
+          <div class="lcd-readout">
+            <small>petrol_95 inland</small>
+            2587c → R25.87/L
+          </div>
+        </article>
+        <article class="panel use-card">
+          <i class="ph ph-arrows-clockwise"></i>
+          <h3>2. Recommendation</h3>
+          <p>
+            <code>calculate_recommendation.py</code> adds the forecast change
+            (in cents) onto the current coastal and inland prices.
+          </p>
+          <p>
+            Drop of 30c or more → wait. Rise of 30c or more → fill now.
+            Smaller move → fill normally.
+          </p>
+        </article>
+        <article class="panel use-card">
+          <i class="ph ph-app-window"></i>
+          <h3>3. iOS app + widget</h3>
+          <p>
+            <code>FuelDataService</code> fetches the GitHub JSON.
+            Remote first, then cache, then the bundled sample.
+          </p>
+          <p>
+            The user picks Coastal/Inland and Petrol 95 / Diesel.
+            <code>PriceFormatter</code> turns 2587 into <strong>R25.87/L</strong>.
+          </p>
+        </article>
+      </div>
+
+      <article class="panel sample">
+        <h3>Concrete walkthrough using the current fixture</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Fuel</th>
+              <th>Scraped now</th>
+              <th>Forecast change</th>
+              <th>Estimated next</th>
+              <th>Advice</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Petrol 95 inland</td>
+              <td>2587c (R25.87)</td>
+              <td>−80c</td>
+              <td>2507c (R25.07)</td>
+              <td>Wait if you can</td>
+            </tr>
+            <tr>
+              <td>Diesel 50ppm inland</td>
+              <td>2410c (R24.10)</td>
+              <td>+55c</td>
+              <td>2465c (R24.65)</td>
+              <td>Fill before the change</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 14px;">
+          The next adjustment date is not scraped. It is calculated as the first
+          Wednesday of next month. Tank impact is later math in the app:
+          <code>change_cents × tank_litres / 100</code>. Data older than 48 hours
+          is marked stale in the UI.
+        </p>
+      </article>
+    </section>
+
+    <!-- Guards -->
+    <section id="guards" style="margin-top: 36px;">
+      <h2>Safety nets, because scrapers lie</h2>
+      <p>Official files change layout. The pipeline is designed to fail closed, not to publish garbage.</p>
+
+      <div class="warns">
+        <article class="panel warn">
+          <i class="ph ph-ruler"></i>
+          <div>
+            <h3>Validators</h3>
+            <p>
+              Each price must be an integer between 1000 and 5000 cents (R10–R50/L).
+              It cannot jump more than R5.00/L or 25% from the previous publish.
+              Petrol 95 and Diesel 50ppm both need coastal <em>and</em> inland.
+            </p>
+          </div>
+        </article>
+        <article class="panel warn">
+          <i class="ph ph-prohibit"></i>
+          <div>
+            <h3>Do not overwrite a good file</h3>
+            <p>
+              If parsing or validation fails, the script exits 1 and leaves the previous
+              <code>public/fuel-data.json</code> in place. The app then keeps using cache.
+            </p>
+          </div>
+        </article>
+        <article class="panel warn">
+          <i class="ph ph-pencil-simple"></i>
+          <div>
+            <h3>Manual override</h3>
+            <p>
+              <code>data/manual-override.json</code> can replace prices or forecast
+              when a real source is unreadable. Set <code>enabled: true</code>.
+            </p>
+          </div>
+        </article>
+        <article class="panel warn">
+          <i class="ph ph-warning"></i>
+          <div>
+            <h3>The fragile bit</h3>
+            <p>
+              If the official PDF stops putting coastal before inland, or renames
+              “Petrol 95”, the regex will miss or swap values. That is why the README
+              says: change the regex, or swap the DMRE adapter, when you have a stable
+              real sample — do not pretend this layout is sacred.
+            </p>
+          </div>
+        </article>
+        <article class="panel warn">
+          <i class="ph ph-link-break"></i>
+          <div>
+            <h3>Secondary source is mostly unused</h3>
+            <p>
+              <code>SECONDARY_VALIDATION_URL</code> is downloaded and stored as
+              <code>validation_url</code>, but the AA adapter only keeps a text snippet.
+              Price sanity checks come from <code>validate_data.py</code> against the
+              previous JSON, not from that second source.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      Generated from the current repo: parse_official_prices.py, sources/dmre.py, update_fuel_data.py, calculate_recommendation.py, and FuelDataService.swift.
+    </footer>
+  </div>
+</body>
+</html>

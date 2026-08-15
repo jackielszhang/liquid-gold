@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 PRICE_RE = re.compile(
-    r"(?P<label>petrol\s*95|95\s*ulp|petrol\s*93|93\s*ulp).*?"
+    r"(?P<label>petrol\s*95|95\s*ulp|petrol\s*93|93\s*ulp|diesel\s*50\s*ppm|50\s*ppm\s*diesel).*?"
     r"(?P<coastal>\d{1,4}(?:[.,]\d{1,2})?)\D+"
     r"(?P<inland>\d{1,4}(?:[.,]\d{1,2})?)",
     re.IGNORECASE | re.DOTALL,
@@ -59,7 +59,10 @@ def parse_official_prices_text(text: str, source_url: str) -> OfficialPrices:
     prices: dict[str, dict[str, int | str]] = {}
     for match in PRICE_RE.finditer(text):
         label = match.group("label").lower()
-        key = "petrol_95" if "95" in label else "petrol_93"
+        if "diesel" in label:
+            key = "diesel_50ppm"
+        else:
+            key = "petrol_95" if "95" in label else "petrol_93"
         prices[key] = {
             "coastal_cents_per_litre": normalize_price_to_cents(match.group("coastal")),
             "inland_cents_per_litre": normalize_price_to_cents(match.group("inland")),

@@ -1,0 +1,486 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000001 /* LiquidGoldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* LiquidGoldApp.swift */; };
+		100000000000000000000002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* RootView.swift */; };
+		100000000000000000000003 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* AppConfig.swift */; };
+		100000000000000000000004 /* FuelModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* FuelModels.swift */; };
+		100000000000000000000005 /* FuelSnapshotBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* FuelSnapshotBuilder.swift */; };
+		100000000000000000000006 /* FuelDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* FuelDataService.swift */; };
+		100000000000000000000007 /* FuelSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* FuelSettingsStore.swift */; };
+		100000000000000000000008 /* PriceFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* PriceFormatter.swift */; };
+		100000000000000000000009 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* Theme.swift */; };
+		10000000000000000000000A /* fuel-data.sample.json in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000A /* fuel-data.sample.json */; };
+		10000000000000000000000B /* LiquidGoldWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000B /* LiquidGoldWidget.swift */; };
+		10000000000000000000000C /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* AppConfig.swift */; };
+		10000000000000000000000D /* FuelModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* FuelModels.swift */; };
+		10000000000000000000000E /* FuelSnapshotBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* FuelSnapshotBuilder.swift */; };
+		10000000000000000000000F /* FuelDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* FuelDataService.swift */; };
+		100000000000000000000010 /* FuelSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* FuelSettingsStore.swift */; };
+		100000000000000000000011 /* PriceFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* PriceFormatter.swift */; };
+		100000000000000000000012 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* Theme.swift */; };
+		100000000000000000000013 /* fuel-data.sample.json in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000A /* fuel-data.sample.json */; };
+		100000000000000000000014 /* LiquidGoldWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 200000000000000000000011 /* LiquidGoldWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		300000000000000000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				100000000000000000000014 /* LiquidGoldWidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		200000000000000000000001 /* LiquidGoldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGoldApp.swift; sourceTree = "<group>"; };
+		200000000000000000000002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		200000000000000000000003 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		200000000000000000000004 /* FuelModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuelModels.swift; sourceTree = "<group>"; };
+		200000000000000000000005 /* FuelSnapshotBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuelSnapshotBuilder.swift; sourceTree = "<group>"; };
+		200000000000000000000006 /* FuelDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuelDataService.swift; sourceTree = "<group>"; };
+		200000000000000000000007 /* FuelSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuelSettingsStore.swift; sourceTree = "<group>"; };
+		200000000000000000000008 /* PriceFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceFormatter.swift; sourceTree = "<group>"; };
+		200000000000000000000009 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		20000000000000000000000A /* fuel-data.sample.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "fuel-data.sample.json"; sourceTree = "<group>"; };
+		20000000000000000000000B /* LiquidGoldWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGoldWidget.swift; sourceTree = "<group>"; };
+		20000000000000000000000C /* LiquidGoldWidget-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LiquidGoldWidget-Info.plist"; sourceTree = "<group>"; };
+		20000000000000000000000D /* LiquidGold.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LiquidGold.entitlements; sourceTree = "<group>"; };
+		20000000000000000000000E /* LiquidGoldWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LiquidGoldWidget.entitlements; sourceTree = "<group>"; };
+		200000000000000000000010 /* LiquidGold.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiquidGold.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000011 /* LiquidGoldWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LiquidGoldWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		300000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		400000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000002 /* LiquidGoldApple */,
+				400000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		400000000000000000000002 /* LiquidGoldApple */ = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000004 /* App */,
+				400000000000000000000005 /* Shared */,
+				400000000000000000000006 /* Widget */,
+				400000000000000000000007 /* Resources */,
+				400000000000000000000008 /* Config */,
+			);
+			path = LiquidGoldApple;
+			sourceTree = "<group>";
+		};
+		400000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000010 /* LiquidGold.app */,
+				200000000000000000000011 /* LiquidGoldWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		400000000000000000000004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000001 /* LiquidGoldApp.swift */,
+				200000000000000000000002 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		400000000000000000000005 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000003 /* AppConfig.swift */,
+				200000000000000000000004 /* FuelModels.swift */,
+				200000000000000000000005 /* FuelSnapshotBuilder.swift */,
+				200000000000000000000006 /* FuelDataService.swift */,
+				200000000000000000000007 /* FuelSettingsStore.swift */,
+				200000000000000000000008 /* PriceFormatter.swift */,
+				200000000000000000000009 /* Theme.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		400000000000000000000006 /* Widget */ = {
+			isa = PBXGroup;
+			children = (
+				20000000000000000000000B /* LiquidGoldWidget.swift */,
+			);
+			path = Widget;
+			sourceTree = "<group>";
+		};
+		400000000000000000000007 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				20000000000000000000000A /* fuel-data.sample.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		400000000000000000000008 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				20000000000000000000000C /* LiquidGoldWidget-Info.plist */,
+				20000000000000000000000D /* LiquidGold.entitlements */,
+				20000000000000000000000E /* LiquidGoldWidget.entitlements */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		500000000000000000000001 /* LiquidGold */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 700000000000000000000001 /* Build configuration list for PBXNativeTarget "LiquidGold" */;
+			buildPhases = (
+				300000000000000000000004 /* Sources */,
+				300000000000000000000002 /* Frameworks */,
+				300000000000000000000005 /* Resources */,
+				300000000000000000000001 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				500000000000000000000003 /* PBXTargetDependency */,
+			);
+			name = LiquidGold;
+			productName = LiquidGold;
+			productReference = 200000000000000000000010 /* LiquidGold.app */;
+			productType = "com.apple.product-type.application";
+		};
+		500000000000000000000002 /* LiquidGoldWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 700000000000000000000002 /* Build configuration list for PBXNativeTarget "LiquidGoldWidgetExtension" */;
+			buildPhases = (
+				300000000000000000000006 /* Sources */,
+				300000000000000000000003 /* Frameworks */,
+				300000000000000000000007 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LiquidGoldWidgetExtension;
+			productName = LiquidGoldWidgetExtension;
+			productReference = 200000000000000000000011 /* LiquidGoldWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		600000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					500000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					500000000000000000000002 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+				};
+			};
+			buildConfigurationList = 700000000000000000000003 /* Build configuration list for PBXProject "LiquidGold" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 400000000000000000000001;
+			productRefGroup = 400000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				500000000000000000000001 /* LiquidGold */,
+				500000000000000000000002 /* LiquidGoldWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		300000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10000000000000000000000A /* fuel-data.sample.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000013 /* fuel-data.sample.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		300000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000001 /* LiquidGoldApp.swift in Sources */,
+				100000000000000000000002 /* RootView.swift in Sources */,
+				100000000000000000000003 /* AppConfig.swift in Sources */,
+				100000000000000000000004 /* FuelModels.swift in Sources */,
+				100000000000000000000005 /* FuelSnapshotBuilder.swift in Sources */,
+				100000000000000000000006 /* FuelDataService.swift in Sources */,
+				100000000000000000000007 /* FuelSettingsStore.swift in Sources */,
+				100000000000000000000008 /* PriceFormatter.swift in Sources */,
+				100000000000000000000009 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10000000000000000000000B /* LiquidGoldWidget.swift in Sources */,
+				10000000000000000000000C /* AppConfig.swift in Sources */,
+				10000000000000000000000D /* FuelModels.swift in Sources */,
+				10000000000000000000000E /* FuelSnapshotBuilder.swift in Sources */,
+				10000000000000000000000F /* FuelDataService.swift in Sources */,
+				100000000000000000000010 /* FuelSettingsStore.swift in Sources */,
+				100000000000000000000011 /* PriceFormatter.swift in Sources */,
+				100000000000000000000012 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		500000000000000000000003 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 500000000000000000000002 /* LiquidGoldWidgetExtension */;
+			targetProxy = 800000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		800000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 600000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 500000000000000000000002;
+			remoteInfo = LiquidGoldWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin XCBuildConfiguration section */
+		900000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+			};
+			name = Debug;
+		};
+		900000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		900000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				CODE_SIGN_ENTITLEMENTS = LiquidGoldApple/Config/LiquidGold.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Liquid Gold";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jackiez.LiquidGold;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		900000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				CODE_SIGN_ENTITLEMENTS = LiquidGoldApple/Config/LiquidGold.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Liquid Gold";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jackiez.LiquidGold;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		900000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = LiquidGoldApple/Config/LiquidGoldWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LiquidGoldApple/Config/LiquidGoldWidget-Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jackiez.LiquidGold.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		900000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = LiquidGoldApple/Config/LiquidGoldWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LiquidGoldApple/Config/LiquidGoldWidget-Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jackiez.LiquidGold.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		700000000000000000000001 /* Build configuration list for PBXNativeTarget "LiquidGold" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				900000000000000000000003 /* Debug */,
+				900000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		700000000000000000000002 /* Build configuration list for PBXNativeTarget "LiquidGoldWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				900000000000000000000005 /* Debug */,
+				900000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		700000000000000000000003 /* Build configuration list for PBXProject "LiquidGold" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				900000000000000000000001 /* Debug */,
+				900000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 600000000000000000000001 /* Project object */;
+}

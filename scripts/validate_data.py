@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 def validate_current_prices(current: dict, previous: dict | None) -> list[str]:
     errors: list[str] = []
-    petrol_95 = current.get("prices", {}).get("petrol_95", {})
+    prices = current.get("prices", {})
     for grade_name, values in current.get("prices", {}).items():
         for key in ("coastal_cents_per_litre", "inland_cents_per_litre"):
             cents = values.get(key)
@@ -24,27 +24,33 @@ def validate_current_prices(current: dict, previous: dict | None) -> list[str]:
                         errors.append(f"{grade_name}.{key} changed by more than R5.00/L")
                     if prior and delta / prior > 0.25:
                         errors.append(f"{grade_name}.{key} changed by more than 25%")
-    if not petrol_95.get("coastal_cents_per_litre") or not petrol_95.get("inland_cents_per_litre"):
-        errors.append("petrol_95 coastal and inland values are required")
+    for required_grade in ("petrol_95", "diesel_50ppm"):
+        values = prices.get(required_grade, {})
+        if not values.get("coastal_cents_per_litre") or not values.get("inland_cents_per_litre"):
+            errors.append(f"{required_grade} coastal and inland values are required")
     return errors
 
 
 def validate_forecast(current: dict, previous: dict | None) -> list[str]:
     forecast = current.get("forecast", {})
     errors: list[str] = []
-    change = forecast.get("petrol_95_estimated_change_cents")
-    direction = forecast.get("direction")
-    if change is None:
-        return errors
-    if not -500 <= change <= 500:
-        errors.append("forecast change outside expected range")
-    expected = "flat"
-    if change > 0:
-        expected = "up"
-    elif change < 0:
-        expected = "down"
-    if direction != expected:
-        errors.append("forecast direction does not match sign")
+    for change_key, direction_key in (
+        ("petrol_95_estimated_change_cents", "direction"),
+        ("diesel_50ppm_estimated_change_cents", "diesel_50ppm_direction"),
+    ):
+        change = forecast.get(change_key)
+        direction = forecast.get(direction_key)
+        if change is None:
+            continue
+        if not -500 <= change <= 500:
+            errors.append(f"{change_key} outside expected range")
+        expected = "flat"
+        if change > 0:
+            expected = "up"
+        elif change < 0:
+            expected = "down"
+        if direction != expected:
+            errors.append(f"{direction_key} does not match sign")
     if forecast.get("as_of_date"):
         age = (date.today() - datetime.strptime(forecast["as_of_date"], "%Y-%m-%d").date()).days
         if age >= 3 and forecast.get("confidence") != "low":

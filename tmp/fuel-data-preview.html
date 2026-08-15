@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fuel Data Preview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4efe7;
+      --panel: rgba(255, 252, 247, 0.82);
+      --text: #211a14;
+      --muted: #6c5d50;
+      --line: rgba(33, 26, 20, 0.12);
+      --accent: #c56a1a;
+      --accent-2: #14532d;
+      --shadow: 0 24px 60px rgba(60, 37, 15, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(197, 106, 26, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(20, 83, 45, 0.14), transparent 24%),
+        linear-gradient(180deg, #f7f2ea 0%, var(--bg) 100%);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+    }
+
+    .hero,
+    .grid,
+    .raw {
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font: 600 0.8rem/1.2 ui-monospace, "SFMono-Regular", monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+    }
+
+    .subhead {
+      max-width: 48rem;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      font: 600 0.9rem/1.2 ui-monospace, "SFMono-Regular", monospace;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      padding: 24px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      min-height: 220px;
+    }
+
+    .grid .card:nth-child(2n) {
+      border-right: none;
+    }
+
+    .label {
+      font: 600 0.82rem/1.2 ui-monospace, "SFMono-Regular", monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .price {
+      font-size: 3rem;
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      margin-bottom: 8px;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    .forecast {
+      color: var(--accent-2);
+    }
+
+    .raw {
+      padding: 24px;
+    }
+
+    pre {
+      margin: 16px 0 0;
+      overflow: auto;
+      padding: 18px;
+      border-radius: 18px;
+      background: #1f1c19;
+      color: #f4efe7;
+      font: 0.9rem/1.55 ui-monospace, "SFMono-Regular", monospace;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 20px 14px 48px;
+      }
+
+      .hero,
+      .card,
+      .raw {
+        padding: 18px;
+      }
+
+      .grid .card {
+        border-right: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Scraped Fuel Snapshot</p>
+      <h1>Current fuel data, distilled.</h1>
+      <p class="subhead">
+        Generated from the current pipeline output in <code>public/fuel-data.json</code>. This is a temp preview
+        for the scraped prices, forecast, and recommendation.
+      </p>
+      <div class="meta">
+        <div class="chip">Updated: 2026-07-07T09:33:43Z</div>
+        <div class="chip">Status: ok</div>
+        <div class="chip">Next adjustment: 2026-08-05</div>
+        <div class="chip">Manual override: false</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <p class="label">Petrol 95 Coastal</p>
+        <p class="price">25.23</p>
+        <p class="caption">R/litre, effective 2026-07-01</p>
+      </article>
+      <article class="card">
+        <p class="label">Petrol 95 Inland</p>
+        <p class="price">25.87</p>
+        <p class="caption">R/litre, effective 2026-07-01</p>
+      </article>
+      <article class="card">
+        <p class="label">Petrol 93 Coastal</p>
+        <p class="price">25.15</p>
+        <p class="caption">R/litre, effective 2026-07-01</p>
+      </article>
+      <article class="card">
+        <p class="label">Petrol 93 Inland</p>
+        <p class="price">25.79</p>
+        <p class="caption">R/litre, effective 2026-07-01</p>
+      </article>
+      <article class="card">
+        <p class="label">Forecast</p>
+        <p class="price forecast">-0.80</p>
+        <p class="caption">Petrol 95 estimated change in R/litre as of 2026-07-07. Direction: down. Confidence: high.</p>
+      </article>
+      <article class="card">
+        <p class="label">Recommendation</p>
+        <p class="price" style="font-size:2.3rem;">Wait</p>
+        <p class="caption">Likely cheaper next month. Top up only if you need to.</p>
+      </article>
+    </section>
+
+    <section class="raw">
+      <p class="eyebrow">Raw JSON</p>
+      <h2>Current payload</h2>
+      <pre>{
+  "schema_version": 1,
+  "last_updated": "2026-07-07T09:33:43Z",
+  "status": "ok",
+  "manual_override": false,
+  "next_adjustment_date": "2026-08-05",
+  "source_status": {
+    "official_prices": "ok",
+    "forecast": "ok"
+  },
+  "prices": {
+    "petrol_95": {
+      "coastal_cents_per_litre": 2523,
+      "inland_cents_per_litre": 2587,
+      "effective_date": "2026-07-01"
+    },
+    "petrol_93": {
+      "coastal_cents_per_litre": 2515,
+      "inland_cents_per_litre": 2579,
+      "effective_date": "2026-07-01"
+    }
+  },
+  "forecast": {
+    "as_of_date": "2026-07-07",
+    "petrol_95_estimated_change_cents": -80,
+    "direction": "down",
+    "confidence": "high"
+  },
+  "recommendation": {
+    "action": "wait",
+    "headline": "Likely cheaper next month",
+    "body": "Top up only if you need to."
+  }
+}</pre>
+    </section>
+  </main>
+</body>
+</html>

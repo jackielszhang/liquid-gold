@@ -11,9 +11,12 @@ class UpdatePipelineTests(unittest.TestCase):
     def test_history_appends_snapshot(self) -> None:
         dataset = {
             "last_updated": "2026-07-07T00:00:00Z",
-            "prices": {"petrol_95": {"coastal_cents_per_litre": 2523, "inland_cents_per_litre": 2587}},
-            "forecast": {"petrol_95_estimated_change_cents": -80},
-            "recommendation": {"action": "wait"},
+            "prices": {
+                "petrol_95": {"coastal_cents_per_litre": 2523, "inland_cents_per_litre": 2587},
+                "diesel_50ppm": {"coastal_cents_per_litre": 2345, "inland_cents_per_litre": 2410},
+            },
+            "forecast": {"petrol_95_estimated_change_cents": -80, "diesel_50ppm_estimated_change_cents": 55},
+            "recommendation": {"petrol_95": {"action": "wait"}, "diesel_50ppm": {"action": "fill_now"}},
         }
         with tempfile.TemporaryDirectory() as tmp:
             history_path = Path(tmp) / "history.json"

@@ -1,4 +1,4 @@
-date,petrol_95_change_cents
-2026-07-05,-70
-2026-07-06,-75
-2026-07-07,-80
+date,petrol_95_change_cents,diesel_50ppm_change_cents
+2026-07-05,-70,45
+2026-07-06,-75,50
+2026-07-07,-80,55
