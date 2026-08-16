@@ -1,9 +1,8 @@
-# Refresh public/fuel-data.json once a day so the iOS app can fetch raw GitHub.
-# 06:15 UTC is early enough for SA morning widgets without racing source sites.
 name: Update fuel data
 
 on:
   schedule:
+    # 08:15 SAST — CEF usually publishes the prior day's PDF by then.
     - cron: "15 6 * * *"
   workflow_dispatch:
 
@@ -24,9 +23,22 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Update fuel data
+        env:
+          # Never publish fixture prices from CI.
+          ALLOW_FIXTURE_FALLBACK: "0"
         run: python scripts/update_fuel_data.py
 
+      - name: Upload raw sources on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuel-data-raw-sources
+          path: data/raw/
+          if-no-files-found: ignore
+
       - name: Run tests
+        env:
+          ALLOW_FIXTURE_FALLBACK: "1"
         run: python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Commit updated data
@@ -36,6 +48,6 @@ jobs:
           fi
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add public/fuel-data.json public/fuel-data-history.json data/raw
+          git add public/fuel-data.json public/fuel-data-history.json
           git commit -m "Update fuel data"
           git push

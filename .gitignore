@@ -12,6 +12,10 @@ xcuserdata/
 *.xcuserstate
 *.xcresult
 
+# Downloaded source PDFs/HTML (kept as CI artifacts on failure, not in git)
+data/raw/*
+!data/raw/.gitkeep
+
 # Local noise
 .DS_Store
 tmp/

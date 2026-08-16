@@ -1,21 +1,16 @@
-"""Central Energy Fund-style forecast adapter.
-
-This is the only adapter that currently supplies next-month cents estimates.
-If the CSV layout changes, keep the public Forecast fields the same and
-change only this mapping.
-"""
+"""CEF adapter — forecast from the latest daily Basic Fuel Price PDF."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.parse_forecast_data import parse_forecast_csv
+from scripts.parse_forecast_data import parse_forecast
 from scripts.sources.base import AdapterResult
 
 
 def parse(path: Path, source_url: str) -> AdapterResult:
     try:
-        parsed = parse_forecast_csv(path, source_url)
+        parsed = parse_forecast(path, source_url)
         return AdapterResult(
             ok=True,
             payload={
