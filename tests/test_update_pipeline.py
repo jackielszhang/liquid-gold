@@ -1,7 +1,6 @@
-"""History, fail-closed fixture policy, and discovery helpers."""
+"""Fail-closed fixture policy, discovery helpers, and v1 publish wiring."""
 
 from copy import deepcopy
-import json
 import os
 from pathlib import Path
 import tempfile
@@ -9,33 +8,10 @@ import unittest
 from unittest import mock
 
 from scripts.fetch_sources import _press_release_sort_key, discover_latest_cef_daily_pdf
-from scripts.update_fuel_data import (
-    allow_fixture_fallback,
-    append_history,
-    build_dataset,
-    write_json,
-)
+from scripts.update_fuel_data import allow_fixture_fallback, build_dataset
 
 
 class UpdatePipelineTests(unittest.TestCase):
-    def test_history_appends_snapshot(self) -> None:
-        dataset = {
-            "last_updated": "2026-07-07T00:00:00Z",
-            "prices": {
-                "petrol_95": {"coastal_cents_per_litre": 2523, "inland_cents_per_litre": 2587},
-                "diesel_50ppm": {"coastal_cents_per_litre": 2345, "inland_cents_per_litre": 2410},
-            },
-            "forecast": {"petrol_95_estimated_change_cents": -80, "diesel_50ppm_estimated_change_cents": 55},
-            "recommendation": {"petrol_95": {"action": "wait"}, "diesel_50ppm": {"action": "fill_now"}},
-        }
-        with tempfile.TemporaryDirectory() as tmp:
-            history_path = Path(tmp) / "history.json"
-            write_json(history_path, [])
-            append_history(history_path, dataset)
-            history = json.loads(history_path.read_text(encoding="utf-8"))
-            self.assertEqual(len(history), 1)
-            self.assertEqual(history[0]["recommendation"]["petrol_95"], "wait")
-
     def test_previous_payload_is_untouched_on_failure_path(self) -> None:
         previous = {"status": "ok", "prices": {"petrol_95": {"coastal_cents_per_litre": 2471}}}
         # Simulate fail-closed: on exception the caller keeps `previous` on disk.

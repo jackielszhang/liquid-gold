@@ -24,6 +24,7 @@ from scripts.fetch_sources import (
     discover_latest_cef_press_release,
     safe_download,
 )
+from scripts.publish_v1_api import publish_v1_api
 from scripts.sources import aa, cef, dmre
 from scripts.validate_data import validate_dataset
 
@@ -180,6 +181,7 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
             # In CI, a brand-new forecast miss with no prior forecast is fatal.
             raise RuntimeError("\n".join(logs + ["forecast required when fixture fallback is disabled"]))
 
+    adjustments = official_result.payload.get("adjustments") or {}
     dataset = {
         "schema_version": 1,
         "last_updated": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -193,6 +195,11 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
         "prices": {
             fuel_key: prices
             for fuel_key, prices in official_result.payload["prices"].items()
+            if fuel_key in SUPPORTED_FUELS
+        },
+        "adjustments": {
+            fuel_key: int(value)
+            for fuel_key, value in adjustments.items()
             if fuel_key in SUPPORTED_FUELS
         },
         "forecast": _merge_forecast(forecast_payload, previous),
@@ -227,19 +234,6 @@ def apply_manual_override(dataset: dict, override: dict) -> dict:
     return merged
 
 
-def append_history(history_path: Path, dataset: dict) -> None:
-    history = load_json(history_path, [])
-    history.append(
-        {
-            "last_updated": dataset["last_updated"],
-            "prices": dataset["prices"],
-            "forecast": dataset["forecast"],
-            "recommendation": {fuel_key: value["action"] for fuel_key, value in dataset["recommendation"].items()},
-        }
-    )
-    write_json(history_path, history[-90:])
-
-
 def main() -> int:
     fuel_data_path = PUBLIC_DIR / "fuel-data.json"
     history_path = PUBLIC_DIR / "fuel-data-history.json"
@@ -251,8 +245,20 @@ def main() -> int:
         errors = validate_dataset(dataset, previous)
         if errors:
             raise RuntimeError("\n".join(errors))
+
+        # Compat path for older app builds; v1 is the public API.
         write_json(fuel_data_path, dataset)
-        append_history(history_path, dataset)
+        publish_info = publish_v1_api(PUBLIC_DIR, dataset)
+        logs.append(
+            "v1 api published months="
+            + ",".join(publish_info["available_months"])
+            + (f" removed={','.join(publish_info['removed_months'])}" if publish_info["removed_months"] else "")
+        )
+
+        # No infinite history — month packs under public/v1/months/ are the archive.
+        if history_path.exists():
+            history_path.unlink()
+
         for line in logs:
             print(line)
         return 0

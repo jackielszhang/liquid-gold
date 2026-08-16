@@ -1,16 +1,36 @@
 # Petrol Timing Widget Data Pipeline
 
-Free, repo-only fuel data generation for an iOS app and WidgetKit extension.
+Free, repo-only fuel data generation for an iOS app and WidgetKit extension — plus a public static JSON API.
 
-## What it does
+## Public API (v1)
+
+Base URL (GitHub Pages):
+
+`https://jackielszhang.github.io/liquid-gold/v1`
+
+| Endpoint | What it returns |
+|---|---|
+| [`/latest.json`](public/v1/latest.json) | Current prices + forecast + recommendation |
+| [`/months/current.json`](public/v1/months/current.json) | This calendar month |
+| [`/months/previous.json`](public/v1/months/previous.json) | Last calendar month |
+| `/months/{yyyy-mm}.json` | Specific month pack |
+| [`/index.json`](public/v1/index.json) | Discovery + attribution |
+| [`/openapi.json`](public/v1/openapi.json) | OpenAPI 3 |
+
+**Retention:** current month + previous month only. No long history.
+
+Docs: [public/v1/README.md](public/v1/README.md)
+
+## What the scraper does
 
 - Discovers the latest CEF daily Basic Fuel Price PDF and monthly press release.
 - Parses the CEF over/under-recovery row into a directional forecast (cents).
 - Applies the official monthly cents adjustment to the last known coastal/inland pump prices.
-- Validates values before publishing.
-- Preserves the last known-good `public/fuel-data.json` by failing instead of overwriting on bad data.
+- Publishes `public/v1/*` and a compat copy at `public/fuel-data.json`.
+- Preserves the last known-good files by failing instead of overwriting on bad data.
 - Supports manual override via `data/manual-override.json`.
 - Runs daily on GitHub Actions (`06:15 UTC`) and commits updated JSON.
+- Deploys `public/` to GitHub Pages on pushes to `main`.
 
 ## Run locally
 
@@ -77,26 +97,18 @@ Forecast parsing inverts CEF recovery:
 
 Absolute label parsing (`Petrol 95 Coastal … Inland …`) remains for the small HTML/TXT fixtures used in unit tests.
 
-## JSON contract
+## App contract
 
-The app should fetch:
+The iOS app fetches:
 
-`https://raw.githubusercontent.com/<owner>/<repo>/main/public/fuel-data.json`
+`https://jackielszhang.github.io/liquid-gold/v1/latest.json`
 
-Important fields:
+Important fields (integer cents per litre):
 
-- `schema_version`
-- `last_updated`
-- `status`
-- `manual_override`
-- `next_adjustment_date`
-- `source_status`
-- `prices`
-- `forecast`
-- `recommendation`
-- `sources`
+- `schema_version`, `last_updated`, `status`
+- `prices`, `forecast`, `recommendation`, `sources`
 
-All prices are integer cents per litre.
+Compat copy still written to `public/fuel-data.json` for older clients.
 
 ## App behavior
 
@@ -109,5 +121,5 @@ All prices are integer cents per litre.
 
 - Forecasts are informational only and not guaranteed.
 - The forecast logic trusts CEF’s average unit over/under-recovery for the current review period.
-- The GitHub repo must be **public** for the iOS app’s raw.githubusercontent.com URL to work without auth.
+- The GitHub repo must be **public**, and GitHub Pages must be enabled (Actions source), for the public API URL to work.
 - Scheduled Actions only run from the remote default branch — push the workflow, then use **Run workflow** once to verify.

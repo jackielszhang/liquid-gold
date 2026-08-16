@@ -1,6 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "api_version": "v1",
+  "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "last_updated": "2026-08-16T18:11:34Z",
+  "generated_at": "2026-08-16T18:11:34Z",
   "status": "ok",
   "manual_override": false,
   "next_adjustment_date": "2026-09-02",
@@ -19,10 +22,6 @@
       "inland_cents_per_litre": 2690,
       "effective_date": "2026-08-05"
     }
-  },
-  "adjustments": {
-    "petrol_95": -52,
-    "diesel_50ppm": 123
   },
   "forecast": {
     "as_of_date": "2026-08-13",

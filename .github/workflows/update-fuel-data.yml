@@ -43,11 +43,13 @@ jobs:
 
       - name: Commit updated data
         run: |
-          if git diff --quiet -- public/fuel-data.json public/fuel-data-history.json; then
+          if git diff --quiet -- public/; then
             exit 0
           fi
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add public/fuel-data.json public/fuel-data-history.json
+          git add public/
+          # Drop the legacy rolling history file if it reappears.
+          git rm -f --ignore-unmatch public/fuel-data-history.json
           git commit -m "Update fuel data"
           git push

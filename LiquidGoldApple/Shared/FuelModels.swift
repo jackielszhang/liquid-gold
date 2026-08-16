@@ -1,6 +1,6 @@
 import Foundation
 
-/// Models that match public/fuel-data.json.
+/// Models that match public/v1/latest.json (and the compat fuel-data.json copy).
 ///
 /// Prices stay in integer cents so the Python pipeline and Swift decoder never
 /// disagree about rounding. Display as rands happens in PriceFormatter, not here.
