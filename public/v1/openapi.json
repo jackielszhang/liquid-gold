@@ -1,0 +1,208 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Liquid Gold Fuel Price API",
+    "version": "1.0.0",
+    "description": "Unofficial, best-effort South African fuel price feed scraped from public CEF/DMPR sources. Free static JSON on GitHub Pages. Prices are integer cents per litre."
+  },
+  "servers": [
+    {
+      "url": "https://jackielszhang.github.io/liquid-gold/v1",
+      "description": "GitHub Pages"
+    }
+  ],
+  "paths": {
+    "/latest.json": {
+      "get": {
+        "summary": "Latest official prices, CEF forecast, and fill recommendation",
+        "operationId": "getLatest",
+        "responses": {
+          "200": {
+            "description": "Current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Latest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/months/{yyyy-mm}.json": {
+      "get": {
+        "summary": "Calendar month pack (official schedule + daily forecasts)",
+        "operationId": "getMonth",
+        "parameters": [
+          {
+            "name": "yyyy-mm",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}$",
+              "example": "2026-08"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Month pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Month"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/months/current.json": {
+      "get": {
+        "summary": "Alias for the current calendar month pack",
+        "operationId": "getCurrentMonth",
+        "responses": {
+          "200": {
+            "description": "Current month pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Month"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/months/previous.json": {
+      "get": {
+        "summary": "Alias for the previous calendar month pack",
+        "operationId": "getPreviousMonth",
+        "responses": {
+          "200": {
+            "description": "Previous month pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Month"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.json": {
+      "get": {
+        "summary": "Discovery document: available months, links, attribution",
+        "operationId": "getIndex",
+        "responses": {
+          "200": {
+            "description": "API index",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Index"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Latest": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "last_updated",
+          "status",
+          "prices",
+          "forecast",
+          "recommendation"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "example": 2
+          },
+          "api_version": {
+            "type": "string",
+            "example": "v1"
+          },
+          "disclaimer": {
+            "type": "string"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "prices": {
+            "type": "object"
+          },
+          "forecast": {
+            "type": "object"
+          },
+          "recommendation": {
+            "type": "object"
+          }
+        }
+      },
+      "Month": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "month",
+          "official",
+          "daily_forecasts"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "example": 2
+          },
+          "month": {
+            "type": "string",
+            "example": "2026-08"
+          },
+          "official": {
+            "type": "object"
+          },
+          "daily_forecasts": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Index": {
+        "type": "object",
+        "properties": {
+          "available_months": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "object"
+          },
+          "attribution": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

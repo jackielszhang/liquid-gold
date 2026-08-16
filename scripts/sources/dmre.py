@@ -1,4 +1,4 @@
-"""Department of Mineral Resources and Energy official-price adapter."""
+"""DMPR / gov.za / CEF press-release adapter for official pump prices."""
 
 from __future__ import annotations
 
@@ -8,9 +8,13 @@ from scripts.parse_official_prices import parse_official_prices
 from scripts.sources.base import AdapterResult
 
 
-def parse(path: Path, source_url: str) -> AdapterResult:
+def parse(
+    path: Path,
+    source_url: str,
+    previous_prices: dict[str, dict] | None = None,
+) -> AdapterResult:
     try:
-        parsed = parse_official_prices(path, source_url)
+        parsed = parse_official_prices(path, source_url, previous_prices=previous_prices)
         return AdapterResult(
             ok=True,
             payload={
@@ -20,6 +24,7 @@ def parse(path: Path, source_url: str) -> AdapterResult:
                 "source_url": parsed.source_url,
                 "parser_used": parsed.parser_used,
                 "snippet": parsed.snippet,
+                "adjustments": parsed.adjustments,
             },
             source_url=source_url,
             path=path,

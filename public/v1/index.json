@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "api_version": "v1",
+  "generated_at": "2026-08-16T18:11:34Z",
+  "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
+  "available_months": [
+    "2026-07",
+    "2026-08"
+  ],
+  "current_month": "2026-08",
+  "previous_month": "2026-07",
+  "links": {
+    "latest": "./latest.json",
+    "current_month": "./months/current.json",
+    "previous_month": "./months/previous.json",
+    "openapi": "./openapi.json",
+    "months": {
+      "2026-07": "./months/2026-07.json",
+      "2026-08": "./months/2026-08.json"
+    }
+  },
+  "attribution": {
+    "official_adjustments": "Department of Mineral and Petroleum Resources / CEF monthly press releases",
+    "daily_forecasts": "Central Energy Fund (CEF) Daily Basic Fuel Price PDFs"
+  }
+}
