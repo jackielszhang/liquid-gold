@@ -2,7 +2,7 @@
   "schema_version": 2,
   "api_version": "v1",
   "month": "2026-08",
-  "generated_at": "2026-08-16T18:11:34Z",
+  "generated_at": "2026-08-17T07:19:04Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "official": {
     "effective_date": "2026-08-05",
