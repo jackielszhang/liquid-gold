@@ -2,13 +2,12 @@
   "schema_version": 2,
   "api_version": "v1",
   "month": "2026-08",
-  "generated_at": "2026-08-30T11:58:25Z",
+  "generated_at": "2026-08-31T13:58:39Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "official": {
-    "effective_date": "2026-08-05",
+    "effective_date": "2026-09-02",
     "adjustment_cents": {
-      "petrol_95": -52,
-      "diesel_50ppm": 123
+      "diesel_50ppm": 315
     },
     "prices": {
       "petrol_95": {
@@ -16,11 +15,11 @@
         "inland_cents_per_litre": 2558
       },
       "diesel_50ppm": {
-        "coastal_cents_per_litre": 2564,
-        "inland_cents_per_litre": 2690
+        "coastal_cents_per_litre": 2879,
+        "inland_cents_per_litre": 3005
       }
     },
-    "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Press-Release-31-July-2026-Change-05-August-2026.pdf"
+    "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Press-Release-28-August-2026-Change-02-September-2026.pdf"
   },
   "daily_forecasts": [
     {
