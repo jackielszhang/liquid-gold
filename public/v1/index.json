@@ -1,22 +1,22 @@
 {
   "schema_version": 2,
   "api_version": "v1",
-  "generated_at": "2026-08-31T13:58:39Z",
+  "generated_at": "2026-09-01T11:43:36Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "available_months": [
-    "2026-07",
-    "2026-08"
+    "2026-08",
+    "2026-09"
   ],
-  "current_month": "2026-08",
-  "previous_month": "2026-07",
+  "current_month": "2026-09",
+  "previous_month": "2026-08",
   "links": {
     "latest": "./latest.json",
     "current_month": "./months/current.json",
     "previous_month": "./months/previous.json",
     "openapi": "./openapi.json",
     "months": {
-      "2026-07": "./months/2026-07.json",
-      "2026-08": "./months/2026-08.json"
+      "2026-08": "./months/2026-08.json",
+      "2026-09": "./months/2026-09.json"
     }
   },
   "attribution": {

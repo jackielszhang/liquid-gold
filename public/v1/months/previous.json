@@ -1,33 +1,107 @@
 {
   "schema_version": 2,
   "api_version": "v1",
-  "month": "2026-07",
-  "generated_at": "2026-08-16T14:21:48Z",
+  "month": "2026-08",
+  "generated_at": "2026-08-31T13:58:39Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "official": {
-    "effective_date": "2026-07-01",
-    "adjustment_cents": {},
+    "effective_date": "2026-09-02",
+    "adjustment_cents": {
+      "diesel_50ppm": 315
+    },
     "prices": {
       "petrol_95": {
-        "coastal_cents_per_litre": 2523,
-        "inland_cents_per_litre": 2610
+        "coastal_cents_per_litre": 2471,
+        "inland_cents_per_litre": 2558
       },
       "diesel_50ppm": {
-        "coastal_cents_per_litre": 2441,
-        "inland_cents_per_litre": 2567
+        "coastal_cents_per_litre": 2879,
+        "inland_cents_per_litre": 3005
       }
     },
-    "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/07/Press-release-26-June-26-Change-01-July-26.pdf"
+    "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Press-Release-28-August-2026-Change-02-September-2026.pdf"
   },
   "daily_forecasts": [
     {
-      "as_of_date": "2026-07-14",
-      "petrol_95_estimated_change_cents": -126,
-      "diesel_50ppm_estimated_change_cents": -74,
-      "direction": "down",
-      "diesel_50ppm_direction": "down",
+      "as_of_date": "2026-08-13",
+      "petrol_95_estimated_change_cents": 74,
+      "diesel_50ppm_estimated_change_cents": 289,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
       "confidence": "low",
-      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/07/Daily-14-07-2026.pdf"
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-13-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-14",
+      "petrol_95_estimated_change_cents": 77,
+      "diesel_50ppm_estimated_change_cents": 290,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "low",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-14-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-18",
+      "petrol_95_estimated_change_cents": 85,
+      "diesel_50ppm_estimated_change_cents": 299,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "high",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-18-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-19",
+      "petrol_95_estimated_change_cents": 90,
+      "diesel_50ppm_estimated_change_cents": 304,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "high",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-19-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-20",
+      "petrol_95_estimated_change_cents": 94,
+      "diesel_50ppm_estimated_change_cents": 307,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "low",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-20-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-21",
+      "petrol_95_estimated_change_cents": 99,
+      "diesel_50ppm_estimated_change_cents": 310,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "low",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-21-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-25",
+      "petrol_95_estimated_change_cents": 103,
+      "diesel_50ppm_estimated_change_cents": 304,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "high",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-25-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-26",
+      "petrol_95_estimated_change_cents": 104,
+      "diesel_50ppm_estimated_change_cents": 298,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "high",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-26-08-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-08-27",
+      "petrol_95_estimated_change_cents": 107,
+      "diesel_50ppm_estimated_change_cents": 292,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "low",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/08/Daily-27-08-2026.pdf"
     }
   ]
 }
