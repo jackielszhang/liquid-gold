@@ -29,10 +29,13 @@ GOVZA_ADJUST_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
-# CEF press release: "Diesel 0.005% Sulphur ( 123.440)cents per litre increase"
-# and "Both grades of Petrol 93 & 95 ... 52.000 cents per litre decrease"
+# CEF press release section 1:
+#   "Both grades of Petrol 93 & 95 (LRP & ULP) ( 134.000) cents per litre increase"
+#   "Diesel 0.005% Sulphur ( 314.900) cents per litre increase"
+# Parentheses around the cents are optional — August 2026 omitted them on petrol
+# (`52.000 cents`) while September 2026 wrapped them (`( 134.000) cents`).
 CEF_PETROL_ADJUST_RE = re.compile(
-    r"Petrol\s*93\s*&\s*95.{0,120}?(?P<cents>\d+(?:[.,]\d+)?)\s*cents\s+per\s+litre\s+"
+    r"Petrol\s*93\s*&\s*95.{0,120}?\(?\s*(?P<cents>\d+(?:[.,]\d+)?)\)?\s*cents\s+per\s+litre\s+"
     r"(?P<direction>decrease|increase)",
     re.IGNORECASE | re.DOTALL,
 )
