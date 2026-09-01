@@ -2,17 +2,18 @@
   "schema_version": 2,
   "api_version": "v1",
   "month": "2026-09",
-  "generated_at": "2026-09-01T11:43:36Z",
+  "generated_at": "2026-09-01T19:49:03Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "official": {
     "effective_date": "2026-09-02",
     "adjustment_cents": {
+      "petrol_95": 134,
       "diesel_50ppm": 315
     },
     "prices": {
       "petrol_95": {
-        "coastal_cents_per_litre": 2471,
-        "inland_cents_per_litre": 2558
+        "coastal_cents_per_litre": 2605,
+        "inland_cents_per_litre": 2692
       },
       "diesel_50ppm": {
         "coastal_cents_per_litre": 2879,
