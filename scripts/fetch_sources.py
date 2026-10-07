@@ -20,9 +20,8 @@ USER_AGENT = "Mozilla/5.0 (compatible; LiquidGold/1.0; +https://github.com/jacki
 DEFAULT_TIMEOUT = 30
 MAX_RETRIES = 3
 
-# Stable listing pages — not the daily/monthly file URLs themselves.
+# Stable listing page — not the daily file URLs themselves.
 CEF_DAILY_INDEX_URL = "https://cefgroup.co.za/daily-basic-fuel-price/"
-CEF_MONTHLY_INDEX_URL = "https://cefgroup.co.za/monthly-press-release/"
 
 DAILY_PDF_RE = re.compile(
     r"(https?://[^\s\"'<>]+/Daily-(\d{2})-(\d{2})-(\d{4})\.pdf)",
@@ -32,35 +31,7 @@ DAILY_PDF_REL_RE = re.compile(
     r"(/wp-content/uploads/[^\s\"'<>]*Daily-(\d{2})-(\d{2})-(\d{4})\.pdf)",
     re.IGNORECASE,
 )
-PRESS_PDF_RE = re.compile(
-    r"(https?://[^\s\"'<>]+/Press-[Rr]elease-[^\s\"'<>]+\.pdf)",
-    re.IGNORECASE,
-)
-PRESS_PDF_REL_RE = re.compile(
-    r"(/wp-content/uploads/[^\s\"'<>]*Press-[Rr]elease-[^\s\"'<>]+\.pdf)",
-    re.IGNORECASE,
-)
 YEAR_PAGE_RE = re.compile(r"https?://cefgroup\.co\.za/(\d{4})-(\d+)/?", re.IGNORECASE)
-CHANGE_DATE_RE = re.compile(
-    r"Change-(\d{2})-([A-Za-z]+)-(\d{2,4})",
-    re.IGNORECASE,
-)
-
-MONTH_NAMES = {
-    "january": 1,
-    "february": 2,
-    "febuary": 2,  # CEF typo seen in the wild
-    "march": 3,
-    "april": 4,
-    "may": 5,
-    "june": 6,
-    "july": 7,
-    "august": 8,
-    "september": 9,
-    "october": 10,
-    "november": 11,
-    "december": 12,
-}
 
 
 @dataclass
@@ -110,9 +81,13 @@ def _extension_for(content_type: str | None, url: str, body: bytes) -> str:
 
     if body.startswith(b"%PDF"):
         return ".pdf"
+    if body.startswith(b"PK\x03\x04"):
+        return ".zip"
     lowered = (content_type or "").lower()
     if "pdf" in lowered:
         return ".pdf"
+    if "zip" in lowered:
+        return ".zip"
     if "html" in lowered:
         return ".html"
     if "csv" in lowered or "text/plain" in lowered:
@@ -179,42 +154,3 @@ def discover_latest_cef_daily_pdf(index_url: str = CEF_DAILY_INDEX_URL) -> str:
     found.sort(key=lambda item: item[0], reverse=True)
     return found[0][1]
 
-
-def _press_release_sort_key(url: str) -> date:
-    """Prefer the 'Change-DD-Month-YYYY' effective date embedded in CEF filenames."""
-
-    match = CHANGE_DATE_RE.search(url)
-    if match:
-        day = int(match.group(1))
-        month = MONTH_NAMES.get(match.group(2).lower())
-        year_raw = match.group(3)
-        year = int(year_raw) if len(year_raw) == 4 else 2000 + int(year_raw)
-        if month:
-            return date(year, month, day)
-
-    # Fall back to the upload folder year/month when the filename is odd.
-    folder = re.search(r"/uploads/(\d{4})/(\d{2})/", url)
-    if folder:
-        return date(int(folder.group(1)), int(folder.group(2)), 1)
-    return date.min
-
-
-def discover_latest_cef_press_release(index_url: str = CEF_MONTHLY_INDEX_URL) -> str:
-    """Resolve the newest monthly press-release PDF (official adjustment)."""
-
-    index_html, index_final = fetch_text(index_url)
-    year_page = _pick_year_page(index_html, index_final)
-    year_html, year_final = fetch_text(year_page)
-
-    urls: list[str] = []
-    for match in PRESS_PDF_RE.finditer(year_html):
-        urls.append(match.group(1))
-    for match in PRESS_PDF_REL_RE.finditer(year_html):
-        urls.append(urljoin(year_final, match.group(1)))
-
-    # De-dupe while keeping order.
-    unique: list[str] = list(dict.fromkeys(urls))
-    if not unique:
-        raise ValueError(f"no Press-Release PDFs found on {year_page}")
-    unique.sort(key=_press_release_sort_key, reverse=True)
-    return unique[0]

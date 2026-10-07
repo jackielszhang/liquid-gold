@@ -1,9 +1,4 @@
-"""Official price parsing — absolute fixtures, or monthly adjustment announcements.
-
-Production sources (gov.za HTML or CEF press-release PDF) publish the monthly
-cents change, not a full coastal/inland table. We apply that signed change to
-the last known pump prices when the effective date is new.
-"""
+"""Parse official DMPR workbooks and adjustment notices used by fixtures."""
 
 from __future__ import annotations
 
@@ -11,7 +6,11 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from io import BytesIO
 from pathlib import Path
+from zipfile import BadZipFile, ZipFile, is_zipfile
+
+from openpyxl import load_workbook
 
 
 PRICE_RE = re.compile(
@@ -21,6 +20,7 @@ PRICE_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2}|(?:\d{1,2}\s+\w+\s+20\d{2}))")
+ZONE_CODES = {"coastal": "1A", "inland": "9C"}
 
 # gov.za: "Petrol 95 (ULP &LRP): Fifty-two cents per litre (52.00 c/l) decrease."
 GOVZA_ADJUST_RE = re.compile(
@@ -316,6 +316,11 @@ def parse_official_prices(
     source_url: str,
     previous_prices: dict[str, dict] | None = None,
 ) -> OfficialPrices:
+    if is_zipfile(path):
+        workbook_data = _workbook_from_archive(path.read_bytes())
+        return _parse_official_workbook(workbook_data, source_url)
+    if path.suffix.lower() == ".xlsx":
+        return _parse_official_workbook(path.read_bytes(), source_url)
     text, parser_used = extract_text(path)
 
     if looks_like_adjustment_announcement(text):
@@ -334,3 +339,109 @@ def parse_official_prices(
     parsed = parse_official_prices_text(text, source_url)
     parsed.parser_used = parser_used
     return parsed
+
+
+def _workbook_from_archive(archive_data: bytes) -> bytes:
+    try:
+        with ZipFile(BytesIO(archive_data)) as archive:
+            for name in archive.namelist():
+                if name.lower().endswith(".xlsx") and "fuel price schedule" in Path(name).name.casefold():
+                    return archive.read(name)
+                if name.lower().endswith(".zip"):
+                    try:
+                        with ZipFile(BytesIO(archive.read(name))) as nested:
+                            for nested_name in nested.namelist():
+                                if nested_name.lower().endswith(".xlsx") and "fuel price schedule" in Path(nested_name).name.casefold():
+                                    return nested.read(nested_name)
+                    except BadZipFile:
+                        continue
+    except BadZipFile as exc:
+        raise ValueError("official source archive is not a valid ZIP") from exc
+    raise ValueError("official source archive contains no fuel price schedule workbook")
+
+
+def _cell_text(value: object) -> str:
+    return " ".join(str(value or "").split()).strip()
+
+
+def _section_prices(worksheet, marker: str, price_column: int, expected_header: tuple[str, ...]) -> dict[str, Decimal]:
+    required_zones = set(ZONE_CODES.values())
+    marker_row = None
+    for row_number, row in enumerate(worksheet.iter_rows(), start=1):
+        if any(marker in _cell_text(cell.value).casefold() for cell in row):
+            marker_row = row_number
+            break
+    if marker_row is None:
+        raise ValueError(f"missing {marker} section in {worksheet.title} sheet")
+
+    table_row = None
+    for row_number in range(marker_row + 1, min(marker_row + 15, worksheet.max_row) + 1):
+        if _cell_text(worksheet.cell(row_number, 1).value).casefold() == "zones":
+            table_row = row_number
+            break
+    if table_row is None:
+        raise ValueError(f"missing zone table for {marker}")
+    header = " ".join(
+        _cell_text(worksheet.cell(row_number, price_column).value).casefold()
+        for row_number in range(table_row, min(table_row + 5, worksheet.max_row) + 1)
+    )
+    if not all(part in header for part in expected_header):
+        raise ValueError(f"unexpected price column for {marker}")
+
+    prices: dict[str, Decimal] = {}
+    for row_number in range(table_row + 1, worksheet.max_row + 1):
+        values = [_cell_text(cell.value).casefold() for cell in worksheet[row_number]]
+        if any("ron" in value or "diesel 0." in value for value in values):
+            break
+        zone = _cell_text(worksheet.cell(row_number, 1).value).upper()
+        if zone not in ZONE_CODES.values():
+            continue
+        raw_price = worksheet.cell(row_number, price_column).value
+        if not isinstance(raw_price, (int, float, Decimal)):
+            raise ValueError(f"missing price for zone {zone} in {marker}")
+        prices[zone] = Decimal(str(raw_price))
+        if prices.keys() >= required_zones:
+            return prices
+    missing = ", ".join(sorted(required_zones - prices.keys()))
+    raise ValueError(f"missing zone price(s) {missing} in {marker}")
+
+
+def _parse_official_workbook(workbook_data: bytes, source_url: str) -> OfficialPrices:
+    try:
+        workbook = load_workbook(BytesIO(workbook_data), read_only=True, data_only=True)
+    except Exception as exc:
+        raise ValueError("official source is not a readable Excel workbook") from exc
+
+    try:
+        if not {"Petrol", "Diesel"}.issubset(workbook.sheetnames):
+            raise ValueError("official workbook is missing Petrol or Diesel sheet")
+        effective_date = None
+        for worksheet in workbook.worksheets:
+            for row in worksheet.iter_rows():
+                for cell in row:
+                    match = re.search(r"EFFECTIVE\s+(\d{1,2}\s+[A-Z]+\s+20\d{2})", _cell_text(cell.value), re.IGNORECASE)
+                    if match:
+                        effective_date = datetime.strptime(match.group(1).title(), "%d %B %Y").date().isoformat()
+                        break
+                if effective_date:
+                    break
+            if effective_date:
+                break
+        if not effective_date:
+            raise ValueError("official workbook has no effective date")
+
+        petrol = _section_prices(workbook["Petrol"], "95 ron unleaded", 11, ("actual", "pump", "price"))
+        diesel = _section_prices(workbook["Diesel"], "diesel 0.005%", 4, ("wholesale", "price"))
+        prices = {
+            "petrol_95": {
+                f"{region}_cents_per_litre": int(petrol[zone].quantize(Decimal("1")))
+                for region, zone in ZONE_CODES.items()
+            },
+            "diesel_50ppm": {
+                f"{region}_cents_per_litre": int(diesel[zone].quantize(Decimal("1")))
+                for region, zone in ZONE_CODES.items()
+            },
+        }
+        return OfficialPrices(effective_date, effective_date, prices, source_url, "openpyxl", "")
+    finally:
+        workbook.close()

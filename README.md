@@ -23,9 +23,9 @@ Docs: [public/v1/README.md](public/v1/README.md)
 
 ## What the scraper does
 
-- Discovers the latest CEF daily Basic Fuel Price PDF and monthly press release.
+- Discovers the current DMPR fuel schedule ZIP and latest CEF daily Basic Fuel Price PDF.
 - Parses the CEF over/under-recovery row into a directional forecast (cents).
-- Applies the official monthly cents adjustment to the last known coastal/inland pump prices.
+- Reads Petrol 95 pump prices and Diesel 50ppm wholesale prices from labeled workbook tables.
 - Publishes `public/v1/*` and a compat copy at `public/fuel-data.json`.
 - Preserves the last known-good files by failing instead of overwriting on bad data.
 - Supports manual override via `data/manual-override.json`.
@@ -42,28 +42,21 @@ python scripts/update_fuel_data.py
 python -m unittest discover -s tests -p 'test_*.py'
 ```
 
-By default, local runs may fall back to `data/fixtures/` when discovery or download fails.
-
-To force a live scrape locally (same as CI):
-
-```bash
-ALLOW_FIXTURE_FALLBACK=0 python scripts/update_fuel_data.py
-```
+Every pipeline run uses live sources and fails without publishing if discovery, download, parsing, or validation fails. Fixtures are only parser test inputs.
 
 Optional environment variables:
 
-- `OFFICIAL_PRICES_URL` — pin a press-release PDF / gov.za HTML URL (skips discovery)
+- `OFFICIAL_PRICES_URL` — pin a DMPR schedule ZIP URL (skips discovery)
 - `FORECAST_URL` — pin a CEF daily PDF URL (skips discovery)
 - `SECONDARY_VALIDATION_URL` — unused for validation today (AA placeholder)
-- `CEF_DAILY_INDEX_URL` / `CEF_MONTHLY_INDEX_URL` — override listing pages
-- `ALLOW_FIXTURE_FALLBACK` — `1` allow fixtures, `0` fail closed
+- `CEF_DAILY_INDEX_URL` — override the CEF daily listing page
 
 ## Sources
 
 Hardcoded listing pages (not secrets):
 
+- Prices: [DMPR fuel prices](https://www.dmpr.gov.za/Branches/Petroleum-Resources/Fuel-Prices) → current schedule ZIP
 - Forecast: [CEF Daily Basic Fuel Price](https://cefgroup.co.za/daily-basic-fuel-price/) → newest `Daily-DD-MM-YYYY.pdf`
-- Official adjustment: [CEF Monthly Press Release](https://cefgroup.co.za/monthly-press-release/) → newest press-release PDF (same figures as the DMPR/gov.za statement)
 
 Diesel **0.005% sulphur** maps to `diesel_50ppm`. Do not use the 0.05% column.
 
@@ -71,7 +64,7 @@ Diesel **0.005% sulphur** maps to `diesel_50ppm`. Do not use the 0.05% column.
 
 - Open the `Update fuel data` workflow in GitHub Actions.
 - Read the failing parser or validation message from the `Update fuel data` step.
-- Download the `fuel-data-raw-sources` artifact for the downloaded PDF/HTML that failed.
+- Download the `fuel-data-raw-sources` artifact for the downloaded ZIP or PDF that failed.
 - Raw files are **not** committed (they change daily and would bloat the repo).
 
 ## Manual override
@@ -84,18 +77,14 @@ Edit [data/manual-override.json](data/manual-override.json) and set `enabled` to
 
 ## Parsing rules
 
-Official announcements are delta-based:
-
-- Parse `52.00 c/l decrease` / `123.44 c/l increase` style lines.
-- If the announcement effective date is new, add that signed change to the last coastal and inland values.
-- If the effective date already matches the published JSON, keep prices (mid-month re-runs).
+The official workbook parser checks the sheet, labeled product section, price-column header, and zone code. Zone 1A maps to coastal and zone 9C maps to inland.
 
 Forecast parsing inverts CEF recovery:
 
 - Over-recovery `+126.4` → estimated change `-126c`
 - Under-recovery is expected to raise pump prices
 
-Absolute label parsing (`Petrol 95 Coastal … Inland …`) remains for the small HTML/TXT fixtures used in unit tests.
+Absolute label parsing (`Petrol 95 Coastal … Inland …`) remains for parser fixtures.
 
 ## App contract
 

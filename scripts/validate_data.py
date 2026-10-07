@@ -8,11 +8,14 @@ publish, not a quieter overwrite.
 from __future__ import annotations
 
 from datetime import date, datetime
+from urllib.parse import urlparse
 
 
 def validate_current_prices(current: dict, previous: dict | None) -> list[str]:
     errors: list[str] = []
     prices = current.get("prices", {})
+    previous_source = ((previous or {}).get("sources") or {}).get("official_prices_url", "")
+    has_live_baseline = urlparse(previous_source).scheme in {"http", "https"}
 
     for grade_name, values in current.get("prices", {}).items():
         for key in ("coastal_cents_per_litre", "inland_cents_per_litre"):
@@ -24,7 +27,7 @@ def validate_current_prices(current: dict, previous: dict | None) -> list[str]:
                 errors.append(f"{grade_name}.{key} cannot be zero")
             if not 1000 <= cents <= 5000:
                 errors.append(f"{grade_name}.{key} outside expected range")
-            if previous:
+            if previous and has_live_baseline:
                 prior = previous.get("prices", {}).get(grade_name, {}).get(key)
                 if isinstance(prior, int):
                     delta = abs(cents - prior)

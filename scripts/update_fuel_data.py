@@ -1,8 +1,4 @@
-"""Build and publish public/fuel-data.json from CEF + DMPR sources.
-
-In CI we fail closed: a download/parse miss leaves the last known-good JSON
-untouched. Locally, fixtures keep the pipeline runnable without the network.
-"""
+"""Build and publish the app payload from live DMPR and CEF sources."""
 
 from __future__ import annotations
 
@@ -19,9 +15,7 @@ if __package__ in {None, ""}:
 from scripts.calculate_recommendation import calculate_recommendation
 from scripts.fetch_sources import (
     CEF_DAILY_INDEX_URL,
-    CEF_MONTHLY_INDEX_URL,
     discover_latest_cef_daily_pdf,
-    discover_latest_cef_press_release,
     safe_download,
 )
 from scripts.publish_v1_api import publish_v1_api
@@ -32,7 +26,6 @@ from scripts.validate_data import validate_dataset
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DIR = ROOT / "public"
 RAW_DIR = ROOT / "data" / "raw"
-FIXTURES_DIR = ROOT / "data" / "fixtures"
 SUPPORTED_FUELS = {"petrol_95", "diesel_50ppm"}
 
 
@@ -45,17 +38,6 @@ def load_json(path: Path, default):
 def write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-
-
-def allow_fixture_fallback() -> bool:
-    """Fixtures are for local/dev only. CI must never publish sample prices."""
-
-    explicit = os.getenv("ALLOW_FIXTURE_FALLBACK")
-    if explicit == "0":
-        return False
-    if explicit == "1":
-        return True
-    return os.getenv("GITHUB_ACTIONS") != "true"
 
 
 def next_adjustment_date(today: date) -> str:
@@ -74,34 +56,23 @@ def load_manual_override() -> dict:
     return load_json(ROOT / "data" / "manual-override.json", {"enabled": False, "reason": "", "prices": {}, "forecast": {}})
 
 
-def _fallback_file(name: str) -> Path:
-    mapping = {
-        "official": FIXTURES_DIR / "official-price-sample.html",
-        "forecast": FIXTURES_DIR / "forecast-sample.csv",
-        "secondary": FIXTURES_DIR / "secondary-source-sample.txt",
-    }
-    return mapping[name]
-
-
 def _resolve_source_url(explicit: str, kind: str) -> str:
-    """Env override wins; otherwise discover the latest CEF file from a listing."""
+    """Use the current DMPR workbook for prices and CEF for forecasts."""
 
     if explicit:
         return explicit
     if kind == "forecast":
         return discover_latest_cef_daily_pdf(os.getenv("CEF_DAILY_INDEX_URL", CEF_DAILY_INDEX_URL))
     if kind == "official":
-        return discover_latest_cef_press_release(os.getenv("CEF_MONTHLY_INDEX_URL", CEF_MONTHLY_INDEX_URL))
+        return dmre.current_schedule_url()
     return ""
 
 
-def _download_or_fixture(url: str | None, bucket: str) -> Path:
+def _download_required(url: str, bucket: str) -> Path:
     download = safe_download(url, RAW_DIR)
     if download:
         return download.path
-    if allow_fixture_fallback():
-        return _fallback_file(bucket)
-    raise RuntimeError(f"{bucket} download failed for url={url!r} and fixture fallback is disabled")
+    raise RuntimeError(f"{bucket} download failed for url={url!r}; refusing to publish sample data")
 
 
 def _merge_forecast(candidate: dict, previous: dict | None) -> dict:
@@ -142,33 +113,17 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
     forecast_url_env = os.getenv("FORECAST_URL", "")
     secondary_url = os.getenv("SECONDARY_VALIDATION_URL", "")
 
-    # Discover live CEF URLs unless the caller pinned a fixture/path via env.
-    try:
-        official_url = _resolve_source_url(official_url_env, "official") if (official_url_env or not allow_fixture_fallback()) else official_url_env
-        forecast_url = _resolve_source_url(forecast_url_env, "forecast") if (forecast_url_env or not allow_fixture_fallback()) else forecast_url_env
-    except Exception as exc:
-        if allow_fixture_fallback():
-            logs.append(f"source discovery failed, using fixtures: {exc}")
-            official_url = official_url_env
-            forecast_url = forecast_url_env
-        else:
-            raise RuntimeError(f"source discovery failed: {exc}") from exc
-
-    official_path = _download_or_fixture(official_url, "official")
-    forecast_path = _download_or_fixture(forecast_url, "forecast")
-    secondary_path = _download_or_fixture(secondary_url, "secondary") if secondary_url else (
-        _fallback_file("secondary") if allow_fixture_fallback() else None
-    )
+    official_url = _resolve_source_url(official_url_env, "official")
+    forecast_url = _resolve_source_url(forecast_url_env, "forecast")
+    official_path = _download_required(official_url, "official prices")
+    forecast_path = _download_required(forecast_url, "forecast")
 
     previous_prices = (previous or {}).get("prices")
     official_result = dmre.parse(official_path, official_url or official_path.name, previous_prices=previous_prices)
     forecast_result = cef.parse(forecast_path, forecast_url or forecast_path.name)
 
-    if secondary_path is not None:
-        secondary_result = aa.parse(secondary_path, secondary_url or secondary_path.name)
-    else:
-        secondary_result = aa.parse(_fallback_file("secondary"), "")
-        secondary_result.source_url = ""
+    secondary_download = safe_download(secondary_url, RAW_DIR) if secondary_url else None
+    secondary_result = aa.parse(secondary_download.path, secondary_download.url) if secondary_download else None
 
     if not official_result.ok:
         logs.append(f"official_prices failed: {official_result.error}")
@@ -177,9 +132,8 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
     forecast_payload = forecast_result.payload if forecast_result.ok else {}
     if not forecast_result.ok:
         logs.append(f"forecast failed: {forecast_result.error}")
-        if not allow_fixture_fallback() and not ((previous or {}).get("forecast") or {}).get("as_of_date"):
-            # In CI, a brand-new forecast miss with no prior forecast is fatal.
-            raise RuntimeError("\n".join(logs + ["forecast required when fixture fallback is disabled"]))
+        if not ((previous or {}).get("forecast") or {}).get("as_of_date"):
+            raise RuntimeError("\n".join(logs + ["forecast required; refusing to publish sample data"]))
 
     adjustments = official_result.payload.get("adjustments") or {}
     dataset = {
@@ -207,7 +161,7 @@ def build_dataset(previous: dict | None = None) -> tuple[dict, list[str]]:
         "sources": {
             "official_prices_url": official_result.source_url,
             "forecast_url": forecast_result.source_url or "",
-            "validation_url": secondary_result.source_url or "",
+            "validation_url": secondary_result.source_url if secondary_result else "",
         },
     }
     for values in dataset["prices"].values():

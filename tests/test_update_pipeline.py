@@ -1,14 +1,11 @@
 """Fail-closed fixture policy, discovery helpers, and v1 publish wiring."""
 
 from copy import deepcopy
-import os
-from pathlib import Path
-import tempfile
 import unittest
 from unittest import mock
 
-from scripts.fetch_sources import _press_release_sort_key, discover_latest_cef_daily_pdf
-from scripts.update_fuel_data import allow_fixture_fallback, build_dataset
+from scripts.fetch_sources import discover_latest_cef_daily_pdf
+from scripts.update_fuel_data import build_dataset
 
 
 class UpdatePipelineTests(unittest.TestCase):
@@ -22,45 +19,24 @@ class UpdatePipelineTests(unittest.TestCase):
             published = previous
         self.assertEqual(published, current)
 
-    def test_fixture_fallback_disabled_in_github_actions(self) -> None:
-        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=False):
-            os.environ.pop("ALLOW_FIXTURE_FALLBACK", None)
-            self.assertFalse(allow_fixture_fallback())
-
-    def test_fixture_fallback_explicit_off(self) -> None:
-        with mock.patch.dict(os.environ, {"ALLOW_FIXTURE_FALLBACK": "0", "GITHUB_ACTIONS": ""}, clear=False):
-            self.assertFalse(allow_fixture_fallback())
-
-    def test_build_dataset_uses_fixtures_locally(self) -> None:
-        with mock.patch.dict(os.environ, {"ALLOW_FIXTURE_FALLBACK": "1"}, clear=False):
-            for key in ("OFFICIAL_PRICES_URL", "FORECAST_URL", "SECONDARY_VALIDATION_URL"):
-                os.environ.pop(key, None)
-            dataset, _ = build_dataset(None)
-            self.assertEqual(dataset["status"], "ok")
-            self.assertIn("petrol_95", dataset["prices"])
-            self.assertIn("diesel_50ppm", dataset["prices"])
-
-    def test_fail_closed_without_urls_when_fixtures_disabled(self) -> None:
+    def test_live_source_failure_does_not_use_sample_fallback(self) -> None:
         with mock.patch.dict(
             os.environ,
-            {
-                "ALLOW_FIXTURE_FALLBACK": "0",
-                "OFFICIAL_PRICES_URL": "",
-                "FORECAST_URL": "",
-            },
+            {"OFFICIAL_PRICES_URL": "", "FORECAST_URL": ""},
             clear=False,
         ):
             with mock.patch(
-                "scripts.update_fuel_data.discover_latest_cef_press_release",
-                side_effect=RuntimeError("network down"),
+                "scripts.update_fuel_data.dmre.current_schedule_url",
+                return_value="https://dmpr.example/current.zip",
+            ), mock.patch(
+                "scripts.update_fuel_data.discover_latest_cef_daily_pdf",
+                return_value="https://cef.example/current.pdf",
+            ), mock.patch(
+                "scripts.update_fuel_data.safe_download",
+                return_value=None,
             ):
-                with self.assertRaises(RuntimeError):
+                with self.assertRaisesRegex(RuntimeError, "refusing to publish sample data"):
                     build_dataset(None)
-
-    def test_press_release_sort_prefers_change_date(self) -> None:
-        older = "https://cefgroup.co.za/wp-content/uploads/2026/07/Press-release-26-June-26-Change-01-July-26.pdf"
-        newer = "https://cefgroup.co.za/wp-content/uploads/2026/08/Press-Release-31-July-2026-Change-05-August-2026.pdf"
-        self.assertGreater(_press_release_sort_key(newer), _press_release_sort_key(older))
 
 
 class DiscoveryHtmlTests(unittest.TestCase):

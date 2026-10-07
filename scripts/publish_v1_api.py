@@ -179,7 +179,7 @@ def build_index_payload(
             },
         },
         "attribution": {
-            "official_adjustments": "Department of Mineral and Petroleum Resources / CEF monthly press releases",
+            "official_adjustments": "Department of Mineral and Petroleum Resources fuel price schedule",
             "daily_forecasts": "Central Energy Fund (CEF) Daily Basic Fuel Price PDFs",
         },
     }

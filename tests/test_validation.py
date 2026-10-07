@@ -55,6 +55,27 @@ class ValidationTests(unittest.TestCase):
         errors = validate_dataset(payload, None)
         self.assertTrue(any("diesel_50ppm coastal and inland values are required" in error for error in errors))
 
+    def test_fixture_baseline_does_not_block_first_live_schedule(self) -> None:
+        previous = deepcopy(BASE)
+        previous["sources"] = {"official_prices_url": "official-price-sample.html"}
+        current = deepcopy(BASE)
+        current["prices"]["diesel_50ppm"].update(
+            coastal_cents_per_litre=2868,
+            inland_cents_per_litre=2956,
+        )
+        self.assertFalse(validate_dataset(current, previous))
+
+    def test_large_jump_from_live_baseline_still_fails(self) -> None:
+        previous = deepcopy(BASE)
+        previous["sources"] = {"official_prices_url": "https://dmpr.example/old-schedule.zip"}
+        current = deepcopy(BASE)
+        current["prices"]["diesel_50ppm"].update(
+            coastal_cents_per_litre=2868,
+            inland_cents_per_litre=2956,
+        )
+        errors = validate_dataset(current, previous)
+        self.assertEqual(sum("changed by more than R5.00/L" in error for error in errors), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
