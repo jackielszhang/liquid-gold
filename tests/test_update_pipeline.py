@@ -1,6 +1,7 @@
 """Fail-closed fixture policy, discovery helpers, and v1 publish wiring."""
 
 from copy import deepcopy
+import os
 import unittest
 from unittest import mock
 
