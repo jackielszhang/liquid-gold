@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "api_version": "v1",
-  "generated_at": "2026-10-07T13:31:05Z",
+  "generated_at": "2026-10-09T13:54:41Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "available_months": [
     "2026-09",
@@ -20,7 +20,7 @@
     }
   },
   "attribution": {
-    "official_adjustments": "Department of Mineral and Petroleum Resources / CEF monthly press releases",
+    "official_adjustments": "Department of Mineral and Petroleum Resources fuel price schedule",
     "daily_forecasts": "Central Energy Fund (CEF) Daily Basic Fuel Price PDFs"
   }
 }
