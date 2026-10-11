@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#131413">
+  <title>Liquid Gold — UI Prototype</title>
+  <link rel="stylesheet" href="./node_modules/dialkit/dist/vanilla/styles.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #131413;
+      --panel: #202220;
+      --ink: #efeadd;
+      --muted: #a5a59d;
+      --rule: #4f524d;
+      --screen-padding: 18px;
+      --section-gap: 12px;
+      --panel-padding: 18px;
+      --title-size: 48px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #090a09; color: var(--ink); font-family: var(--mono); }
+    button { color: inherit; font: inherit; }
+    button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .workspace { min-height: 100dvh; display: flex; align-items: center; justify-content: center; gap: 48px; padding: 16px; }
+    .phone-frame { position: relative; flex: none; width: min(390px, calc(100vw - 24px)); aspect-ratio: 390 / 844; max-height: calc(100dvh - 32px); padding: 9px; overflow: hidden; border: 1px solid #4a4d48; border-radius: 44px; background: #050505; box-shadow: 0 24px 80px #000a; }
+    .phone-screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 35px; background: var(--bg); }
+    .phone-island { position: absolute; z-index: 6; top: 12px; left: 50%; width: 116px; height: 30px; transform: translateX(-50%); border-radius: 18px; background: #050505; pointer-events: none; }
+    .home-indicator { position: absolute; z-index: 6; bottom: 8px; left: 50%; width: 108px; height: 4px; transform: translateX(-50%); border-radius: 5px; background: var(--ink); pointer-events: none; }
+    .app { width: 100%; height: 100%; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: max(48px, env(safe-area-inset-top)) var(--screen-padding) max(30px, env(safe-area-inset-bottom)); }
+    .app::-webkit-scrollbar { display: none; }
+    .inspector { width: min(320px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 18px; border: 1px solid var(--rule); background: #151715; }
+    .inspector-title { margin: 0 0 8px; font-size: 13px; letter-spacing: 1px; }
+    .inspector-copy { margin: 0 0 16px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .playground-link { display: block; margin: 0 0 16px; padding: 12px; border: 1px solid var(--rule); color: var(--ink); font-size: 10px; font-weight: 700; letter-spacing: .6px; text-decoration: none; }
+    .playground-link:hover { background: var(--panel); }
+    #dialkit-root { min-height: 260px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+    .icon-actions { display: flex; gap: 4px; }
+    .icon-button { display: grid; width: 44px; height: 44px; place-items: center; border: 0; background: transparent; cursor: pointer; font-size: 20px; }
+    .title { margin: 12px 0 18px; font-size: var(--title-size); font-weight: 900; line-height: .82; letter-spacing: -4px; white-space: pre-line; }
+    .status { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; color: var(--muted); font-size: 11px; letter-spacing: .6px; }
+    .dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: var(--ink); }
+    .rule { height: 1px; border: 0; background: var(--rule); }
+    .header-rule { margin: 0 0 10px; }
+    .stack { display: grid; gap: var(--section-gap); }
+    .panel { min-width: 0; padding: var(--panel-padding); background: var(--panel); border: 1px solid var(--rule); }
+    .panel-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 1.2px; }
+    .panel-top, .split { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .hero-price { overflow: hidden; margin: 12px 0 18px; font-size: clamp(38px, 11vw, 48px); font-weight: 700; letter-spacing: -2px; text-overflow: clip; white-space: nowrap; }
+    .meta { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+    .hero .rule { margin: 14px 0 12px; }
+    .next-price { font-size: 12px; }
+    .muted { color: var(--muted); }
+    .vector { display: block; width: 100%; height: 142px; margin: 8px 0; }
+    .vector-note { margin: 12px 0 0; color: var(--muted); font-size: 9px; }
+    .change-value { margin: 14px 0 0; font-size: 24px; font-weight: 700; }
+    .decision-title { margin: 12px 0; font-size: clamp(27px, 8vw, 32px); font-weight: 900; line-height: 1.02; }
+    .body-copy { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .decision .rule { margin: 16px 0 12px; }
+    .impact { margin: 0 0 12px; font-size: 12px; font-weight: 700; line-height: 1.45; }
+    .confidence { margin: 0; color: var(--muted); font-size: 10px; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .metric-value { margin: 14px 0 0; font-size: 17px; font-weight: 700; line-height: 1.2; }
+    .footer { padding: 18px 0 8px; color: var(--muted); font-size: 10px; letter-spacing: 1px; text-align: center; }
+    .action { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 56px; padding: 16px 18px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer; font-size: 14px; font-weight: 700; text-align: left; }
+    .action:active, .option:active, .stepper button:active { opacity: .76; }
+    .setup-copy { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .setup-stack { display: grid; gap: 14px; }
+    .control-panel { display: grid; gap: 14px; }
+    .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .option { min-height: 48px; padding: 10px 8px; border: 1px solid var(--rule); background: var(--panel); cursor: pointer; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .option[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+    .tank-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .tank-value { font-size: 30px; font-weight: 700; }
+    .stepper { display: flex; gap: 8px; }
+    .stepper button { width: 42px; height: 42px; border: 1px solid var(--rule); background: transparent; cursor: pointer; font-size: 20px; }
+    .hint { margin: 0; color: var(--muted); font-size: 11px; }
+    .sheet-backdrop { position: absolute; z-index: 5; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding-top: 24px; background: #0009; }
+    .sheet { width: 100%; max-height: 94%; overflow: auto; padding: 8px 18px 32px; border: 1px solid var(--rule); border-bottom: 0; background: var(--bg); animation: rise .22s ease-out; touch-action: pan-y; }
+    .sheet-handle { width: 42px; height: 4px; margin: 4px auto 18px; border-radius: 9px; background: var(--rule); touch-action: none; }
+    .sheet-heading { margin: 0 0 16px; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-align: center; }
+    .loading, .error { padding: 36px 18px; color: var(--muted); font-size: 12px; }
+    .error { color: var(--ink); }
+    [hidden] { display: none !important; }
+    @keyframes rise { from { transform: translateY(24px); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
+    @media (max-width: 760px) { .workspace { flex-direction: column; align-items: center; gap: 16px; padding: 12px; } .inspector { max-height: none; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main class="workspace">
+    <section class="phone-frame" aria-label="Phone preview">
+      <div class="phone-screen">
+        <div class="phone-island" aria-hidden="true"></div>
+        <main class="app">
+          <section id="setup" hidden aria-label="Initial configuration">
+      <div class="panel-label" style="padding-top:24px">LG / INITIAL CONFIGURATION</div>
+      <h1 class="title">FUEL<br>TIMING</h1>
+      <p class="setup-copy">Set your region, fuel and tank size to see when to fill.</p>
+      <div class="setup-stack" id="setup-controls"></div>
+          </section>
+          <section id="dashboard" hidden aria-label="Fuel timing dashboard">
+      <header>
+        <div class="masthead"><span>LG / 001</span><div class="icon-actions">
+          <button class="icon-button" id="refresh" aria-label="Reload fuel data" title="Reload fuel data">↻</button>
+          <button class="icon-button" id="open-settings" aria-label="Settings" title="Settings">☷</button>
+        </div></div>
+        <h1 class="title">FUEL<br>TIMING</h1>
+        <div class="status"><span class="dot"></span><span id="status-text">READING LIVE DATA</span></div>
+        <hr class="rule header-rule">
+      </header>
+      <div id="content" class="stack"><div class="loading">READING DATA</div></div>
+      <footer class="footer">LIQUID GOLD&nbsp;&nbsp; / &nbsp;&nbsp;FUEL INTELLIGENCE</footer>
+          </section>
+        </main>
+        <div id="sheet-root"></div>
+        <div class="home-indicator" aria-hidden="true"></div>
+      </div>
+    </section>
+    <aside class="inspector" aria-label="Prototype navigation">
+      <h2 class="inspector-title">PREVIEW CONTROLS</h2>
+      <p class="inspector-copy">Choose a screen and data state. These controls are prototype-only; the phone view remains the SwiftUI-sized app.</p>
+      <a class="playground-link" href="./fuel-card-playground.html">OPEN FUEL CARD PLAYGROUND ↗</a>
+      <div id="dialkit-root"></div>
+    </aside>
+  </main>
+  <script src="./node_modules/dialkit/dist/vanilla/browser.global.js"></script>
+  <script>
+    const DATA_URL = 'https://jackielszhang.github.io/liquid-gold/v1/latest.json';
+    const DEFAULTS = { region: 'coastal', fuel: 'petrol_95', tank: 50 };
+    const labels = { coastal: 'Coastal', inland: 'Inland', petrol_95: 'Petrol 95', diesel_50ppm: 'Diesel 50ppm' };
+    const requestedSetup = new URLSearchParams(location.search).has('setup');
+    let payload;
+    let selection = readSelection();
+    let previewPage = requestedSetup || !localStorage.getItem('liquid-gold-selection') ? 'setup' : 'dashboard';
+    let previewDataState = 'stale';
+    let dialNavigation;
+    let loading = false;
+
+    function readSelection() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('liquid-gold-selection') || '{}');
+        return {
+          region: ['coastal', 'inland'].includes(saved.region) ? saved.region : DEFAULTS.region,
+          fuel: ['petrol_95', 'diesel_50ppm'].includes(saved.fuel) ? saved.fuel : DEFAULTS.fuel,
+          tank: Number.isInteger(saved.tank) ? Math.round((Math.max(20, Math.min(120, saved.tank)) - 20) / 5) * 5 + 20 : DEFAULTS.tank
+        };
+      }
+      catch { return { ...DEFAULTS }; }
+    }
+    function saveSelection() { localStorage.setItem('liquid-gold-selection', JSON.stringify(selection)); }
+    function escapeHTML(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]); }
+    function money(cents) { return cents == null ? '—' : `R${(cents / 100).toFixed(2)}`; }
+    function delta(cents) { return cents == null ? '—' : `${cents > 0 ? '+' : ''}${cents}c`; }
+    function shortDate(value) {
+      if (!value) return '—';
+      return new Intl.DateTimeFormat('en-ZA', { day: 'numeric', month: 'short' }).format(new Date(`${value}T00:00:00`));
+    }
+    function snapshot() {
+      const prices = payload?.prices?.[selection.fuel];
+      const rec = payload?.recommendation?.[selection.fuel];
+      if (!prices || !rec) return null;
+      const change = rec.change_cents_per_litre ?? null;
+      const updated = Date.parse(payload.last_updated);
+      const stale = !Number.isFinite(updated) || Date.now() - updated > 48 * 60 * 60 * 1000;
+      return {
+        current: prices[`${selection.region}_cents_per_litre`],
+        next: rec.next_price_cents_per_litre?.[`${selection.region}_cents_per_litre`],
+        change,
+        impact: change == null ? null : Math.trunc(change * selection.tank / 100),
+        stale,
+        status: stale ? 'Stale' : 'Live data',
+        rec,
+        nextDate: payload.next_adjustment_date,
+        bestDate: rec.best_fill_up_date,
+        confidence: stale ? 'Forecast stale' : `Forecast confidence: ${payload.forecast?.confidence || 'unknown'}`
+      };
+    }
+    function panel(title, content, extra = '') {
+      return `<section class="panel ${extra}"><div class="panel-label">${title}</div>${content}</section>`;
+    }
+    function vector(change) {
+      const startY = 67;
+      const travel = Math.min(Math.abs(change || 0) / 100, 1) * 48;
+      const endY = startY - (change > 0 ? travel : -travel);
+      const dots = Array.from({ length: 7 }, (_, row) => Array.from({ length: 21 }, (_, col) =>
+        `<circle cx="${10 + col * 4}" cy="${9 + row * 14}" r="1.4" fill="var(--rule)"/>`).join('')).join('');
+      return `<svg class="vector" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Price direction ${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}">
+        ${dots}<path d="M10 ${startY} L90 ${endY}" fill="none" stroke="var(--ink)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+        <circle cx="10" cy="${startY}" r="3" fill="var(--ink)"/><circle cx="10" cy="${startY}" r="1" fill="var(--panel)"/>
+        <circle cx="90" cy="${endY}" r="3" fill="var(--ink)"/><circle cx="90" cy="${endY}" r="1" fill="var(--panel)"/>
+      </svg>`;
+    }
+    function impactLine(s) {
+      if (s.impact == null) return 'Tank impact unavailable.';
+      if (s.impact > 0) return `WAITING COSTS ~R${Math.abs(s.impact).toFixed(2)} / ${selection.tank}L`;
+      if (s.impact < 0) return `WAITING SAVES ~R${Math.abs(s.impact).toFixed(2)} / ${selection.tank}L`;
+      return `NO MATERIAL COST CHANGE / ${selection.tank}L`;
+    }
+    function dashboardMarkup(s) {
+      const next = s.next == null ? '—' : money(s.next);
+      return `
+        <section class="panel hero">
+          <div class="panel-top"><span class="panel-label">01 / PUMP PRICE</span><span aria-hidden="true">✳</span></div>
+          <div class="hero-price">${money(s.current)}<span style="font-size:.48em">/L</span></div>
+          <div class="split meta"><span>${labels[selection.fuel].toUpperCase()}</span><span>${labels[selection.region].toUpperCase()}</span></div>
+          <hr class="rule"><div class="split next-price"><span>NEXT / ${next}/L</span><strong>${delta(s.change)}</strong></div>
+        </section>
+        <section class="panel">
+          <div class="panel-top"><span class="panel-label">02 / PRICE VECTOR</span><span class="panel-label">C/L</span></div>
+          ${s.change == null ? '<div class="loading">PROJECTION UNAVAILABLE</div>' : vector(s.change)}
+          <div class="split panel-label"><span>NOW</span><span>NEXT ADJUSTMENT</span></div>
+          <p class="change-value" aria-label="Projected price change ${delta(s.change)} per litre">${delta(s.change)} PER LITRE</p>
+          ${s.change == null ? '' : '<p class="vector-note">VECTOR SHOWS DIRECTION; UP TO 100C SCALE</p>'}
+        </section>
+        <section class="panel decision">
+          <div class="panel-label">03 / DECISION</div><h2 class="decision-title">${escapeHTML(s.rec.headline)}</h2>
+          <p class="body-copy">${escapeHTML(s.rec.body)}</p><hr class="rule">
+          <p class="impact">${impactLine(s)}</p><p class="confidence">${s.confidence.toUpperCase()}</p>
+        </section>
+        <div class="metrics">
+          ${panel('04 / ADJUSTMENT', `<p class="metric-value">${shortDate(s.nextDate).toUpperCase()}</p>`)}
+          ${panel('05 / BEST FILL', `<p class="metric-value">${shortDate(s.bestDate).toUpperCase()}</p>`)}
+        </div>`;
+    }
+    function options(title, key, values, state = selection) {
+      return `<section class="panel control-panel"><div class="panel-label">${title}</div><div class="options" role="group" aria-label="${title}">
+        ${values.map(([value, label]) => `<button class="option" type="button" aria-pressed="${state[key] === value}" data-key="${key}" data-value="${value}">${label}</button>`).join('')}
+      </div></section>`;
+    }
+    function tankControl(state = selection) {
+      return `<section class="panel control-panel"><div class="panel-label">03 / TANK SIZE</div>
+        <div class="tank-row"><span class="tank-value">${state.tank} L</span><div class="stepper">
+          <button type="button" aria-label="Decrease tank size" data-tank="-5">−</button><button type="button" aria-label="Increase tank size" data-tank="5">+</button>
+        </div></div><p class="hint">Used to estimate the cost of your next fill.</p></section>`;
+    }
+    function syncControls(container, state) {
+      container.querySelectorAll('[data-key]').forEach(button => { button.setAttribute('aria-pressed', String(state[button.dataset.key] === button.dataset.value)); });
+      const tank = container.querySelector('.tank-value');
+      if (tank) tank.textContent = `${state.tank} L`;
+    }
+    function bindControls(container, state, onChange) {
+      container.querySelectorAll('[data-key]').forEach(button => button.addEventListener('click', () => {
+        state[button.dataset.key] = button.dataset.value;
+        syncControls(container, state);
+        onChange();
+      }));
+      container.querySelectorAll('[data-tank]').forEach(button => button.addEventListener('click', () => {
+        state.tank = Math.max(20, Math.min(120, state.tank + Number(button.dataset.tank)));
+        syncControls(container, state);
+        onChange();
+      }));
+    }
+    function renderControls() {
+      const html = `${options('01 / REGION', 'region', [['coastal', 'Coastal'], ['inland', 'Inland']])}
+        ${options('02 / FUEL', 'fuel', [['petrol_95', 'Petrol 95'], ['diesel_50ppm', 'Diesel 50ppm']])}${tankControl()}`;
+      document.getElementById('setup-controls').innerHTML = `${html}<button class="action" id="continue">SHOW MY SIGNAL <span>↗</span></button>`;
+      bindControls(document.getElementById('setup-controls'), selection, () => {});
+      document.getElementById('continue')?.addEventListener('click', () => { saveSelection(); history.replaceState(null, '', location.pathname); setPreviewPage('dashboard'); });
+    }
+    function setPreviewPage(page) {
+      previewPage = page;
+      if (dialNavigation && dialNavigation.getValues().navigation.page !== page) dialNavigation.setValue('navigation.page', page);
+      render();
+    }
+    function closeSheet(syncPage = true) {
+      document.getElementById('sheet-root').innerHTML = '';
+      document.getElementById('dashboard').inert = false;
+      if (!document.getElementById('dashboard').hidden) document.getElementById('open-settings').focus();
+      if (syncPage && previewPage === 'settings') setPreviewPage('dashboard');
+    }
+    function openSheet(syncPage = true) {
+      const root = document.getElementById('sheet-root');
+      if (root.childElementCount) return;
+      const draft = { ...selection };
+      document.getElementById('dashboard').inert = true;
+      root.innerHTML = `<div class="sheet-backdrop" id="backdrop"><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet-handle" id="sheet-handle" aria-hidden="true"></div><h2 class="sheet-heading" id="sheet-title">CONFIGURATION</h2>
+        <div id="sheet-controls" class="setup-stack"></div><button class="action" id="save">SAVE CONFIGURATION <span>↗</span></button></section></div>`;
+      const controls = document.getElementById('sheet-controls');
+      controls.innerHTML = `${options('01 / REGION', 'region', [['coastal', 'Coastal'], ['inland', 'Inland']], draft)}${options('02 / FUEL', 'fuel', [['petrol_95', 'Petrol 95'], ['diesel_50ppm', 'Diesel 50ppm']], draft)}${tankControl(draft)}`;
+      bindControls(controls, draft, () => {});
+      root.querySelector('#save').addEventListener('click', () => { selection = draft; saveSelection(); closeSheet(); render(); });
+      root.querySelector('#backdrop').addEventListener('click', event => { if (event.target.id === 'backdrop') closeSheet(); });
+      let startY = 0;
+      root.querySelector('#sheet-handle').addEventListener('pointerdown', event => { startY = event.clientY; event.currentTarget.setPointerCapture(event.pointerId); });
+      root.querySelector('#sheet-handle').addEventListener('pointerup', event => { if (event.clientY - startY > 45) closeSheet(); });
+      root.querySelector('.option')?.focus();
+      if (syncPage) setPreviewPage('settings');
+    }
+    function onEscape(event) { if (event.key === 'Escape' && document.getElementById('sheet-root').childElementCount) closeSheet(); }
+    function render() {
+      const sheetOpen = document.getElementById('sheet-root').childElementCount > 0;
+      if (previewPage !== 'settings' && sheetOpen) closeSheet(false);
+      const setupMode = previewPage === 'setup';
+      document.getElementById('setup').hidden = !setupMode;
+      document.getElementById('dashboard').hidden = setupMode;
+      if (setupMode) { renderControls(); return; }
+      if (previewPage === 'settings' && !sheetOpen) openSheet(false);
+      const s = snapshot();
+      const isLoading = loading || previewDataState === 'loading';
+      const unavailable = previewDataState === 'unavailable' || !s;
+      document.getElementById('status-text').textContent = isLoading ? 'READING LIVE DATA' : unavailable ? 'AWAITING DATA' : previewDataState === 'stale' ? 'STALE' : 'LIVE DATA';
+      if (isLoading) document.getElementById('content').innerHTML = '<div class="loading">READING DATA</div>';
+      else if (unavailable) document.getElementById('content').innerHTML = `<section class="panel error">${payload && previewDataState !== 'unavailable' ? 'Fuel data is incomplete.' : 'Unable to load fuel data.'}</section>`;
+      else {
+        const display = { ...s, confidence: previewDataState === 'stale' ? 'Forecast stale' : `Forecast confidence: ${payload.forecast?.confidence || 'unknown'}` };
+        document.getElementById('content').innerHTML = dashboardMarkup(display);
+      }
+    }
+    async function loadData() {
+      loading = true; render();
+      try {
+        const response = await fetch(DATA_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Fuel data request failed (${response.status}).`);
+        payload = await response.json();
+      } catch (error) {
+        console.error(error);
+        payload = null;
+      } finally { loading = false; render(); }
+    }
+    document.getElementById('refresh').addEventListener('click', loadData);
+    document.getElementById('open-settings').addEventListener('click', () => openSheet());
+    document.addEventListener('keydown', onEscape);
+    const dialRoot = DialKit.createDialRoot({ mode: 'inline', target: document.getElementById('dialkit-root'), theme: 'dark' });
+    dialNavigation = DialKit.createDialKit('Liquid Gold Preview', {
+      navigation: {
+        page: { type: 'select', options: [{ value: 'setup', label: 'Setup' }, { value: 'dashboard', label: 'Dashboard' }, { value: 'settings', label: 'Settings' }], default: previewPage },
+        state: { type: 'select', options: [{ value: 'live', label: 'Live data' }, { value: 'stale', label: 'Stale data' }, { value: 'loading', label: 'Loading' }, { value: 'unavailable', label: 'Unavailable' }], default: 'stale' }
+      },
+      layout: { screenPadding: [18, 12, 28, 1], sectionGap: [12, 6, 24, 1], panelPadding: [18, 10, 28, 1], titleSize: [48, 36, 58, 1] },
+      theme: { bg: '#131413', panel: '#202220', ink: '#efeadd', muted: '#a5a59d', rule: '#4f524d' }
+    }, { id: 'liquid-gold-prototype', persist: false });
+    dialNavigation.subscribe(values => {
+      previewPage = values.navigation.page;
+      previewDataState = values.navigation.state;
+      for (const [key, value] of Object.entries(values.theme)) document.documentElement.style.setProperty(`--${key}`, value);
+      for (const [key, value] of Object.entries(values.layout)) document.documentElement.style.setProperty(`--${key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`, `${value}px`);
+      render();
+    });
+    render();
+    loadData();
+  </script>
+</body>
+</html>

@@ -219,6 +219,7 @@ public struct FuelSnapshot: Equatable {
     public var estimatedTankImpact: Int?
     public var nextAdjustmentDate: Date?
     public var bestFillUpDate: Date?
+    public var recommendationAction: String
     public var recommendationText: String
     public var recommendationBody: String
     public var confidenceText: String

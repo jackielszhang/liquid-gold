@@ -1,4 +1,5 @@
 import SwiftUI
+import LiquidGoldShared
 
 /// Hosts the one shared settings store so the dashboard and settings sheet
 /// always read the same region / fuel / tank size.

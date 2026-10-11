@@ -44,7 +44,11 @@ public struct FuelDataService {
         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             throw URLError(.badServerResponse)
         }
-        return try JSONDecoder().decode(FuelPayload.self, from: data)
+        let payload = try JSONDecoder().decode(FuelPayload.self, from: data)
+        guard payload.status == "ok" else {
+            throw URLError(.badServerResponse)
+        }
+        return payload
     }
 
     public func loadCachedPayload() throws -> FuelPayload {

@@ -1,23 +1,35 @@
-"""Fail-closed fixture policy, discovery helpers, and v1 publish wiring."""
+"""Fail-closed publishing and source discovery."""
 
-from copy import deepcopy
+from contextlib import redirect_stderr
+import io
+import os
+from pathlib import Path
+import tempfile
 import unittest
 from unittest import mock
 
+from scripts import update_fuel_data
 from scripts.fetch_sources import discover_latest_cef_daily_pdf
 from scripts.update_fuel_data import build_dataset
 
 
 class UpdatePipelineTests(unittest.TestCase):
     def test_previous_payload_is_untouched_on_failure_path(self) -> None:
-        previous = {"status": "ok", "prices": {"petrol_95": {"coastal_cents_per_litre": 2471}}}
-        # Simulate fail-closed: on exception the caller keeps `previous` on disk.
-        current = deepcopy(previous)
-        try:
-            raise RuntimeError("official_prices failed")
-        except RuntimeError:
-            published = previous
-        self.assertEqual(published, current)
+        with tempfile.TemporaryDirectory() as tmp:
+            public_dir = Path(tmp)
+            payload_path = public_dir / "fuel-data.json"
+            original = '{"status":"ok","prices":{}}\n'
+            payload_path.write_text(original, encoding="utf-8")
+
+            with (
+                mock.patch.object(update_fuel_data, "PUBLIC_DIR", public_dir),
+                mock.patch.object(update_fuel_data, "load_manual_override", return_value={"enabled": False}),
+                mock.patch.object(update_fuel_data, "build_dataset", side_effect=RuntimeError("source failed")),
+                redirect_stderr(io.StringIO()),
+            ):
+                self.assertEqual(update_fuel_data.main(), 1)
+
+            self.assertEqual(payload_path.read_text(encoding="utf-8"), original)
 
     def test_live_source_failure_does_not_use_sample_fallback(self) -> None:
         with mock.patch.dict(

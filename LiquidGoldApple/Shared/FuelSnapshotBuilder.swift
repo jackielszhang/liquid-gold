@@ -50,6 +50,7 @@ public enum FuelSnapshotBuilder {
             estimatedTankImpact: estimatedTankImpact,
             nextAdjustmentDate: nextAdjustmentDate,
             bestFillUpDate: bestFillUpDate,
+            recommendationAction: recommendation.action,
             recommendationText: recommendation.headline,
             recommendationBody: recommendation.body,
             confidenceText: confidenceText(

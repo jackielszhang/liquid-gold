@@ -5,10 +5,9 @@ change, the widget copy and tank-impact math change with them.
 """
 
 import unittest
-from unittest.mock import patch
 
 from scripts.calculate_recommendation import calculate_recommendation
-from scripts.update_fuel_data import apply_manual_override, build_dataset
+from scripts.update_fuel_data import apply_manual_override
 
 
 class RecommendationTests(unittest.TestCase):
@@ -42,8 +41,18 @@ class RecommendationTests(unittest.TestCase):
         self.assertEqual(recommendation["action"], "unknown")
 
     def test_manual_override_wins(self) -> None:
-        with patch.dict("os.environ", {"USE_FIXTURES": "1"}):
-            dataset, _ = build_dataset(None)
+        dataset = {
+            "next_adjustment_date": "2026-08-05",
+            "prices": {
+                "petrol_95": {"coastal_cents_per_litre": 2500, "inland_cents_per_litre": 2600},
+                "diesel_50ppm": {"coastal_cents_per_litre": 2400, "inland_cents_per_litre": 2500},
+            },
+            "forecast": {
+                "petrol_95_estimated_change_cents": 0,
+                "diesel_50ppm_estimated_change_cents": 0,
+            },
+            "recommendation": {},
+        }
         merged = apply_manual_override(
             dataset,
             {
