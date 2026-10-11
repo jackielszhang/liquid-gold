@@ -23,6 +23,7 @@ final class FuelSharedTests: XCTestCase {
         )
         XCTAssertEqual(snapshot?.currentPrice, 2523)
         XCTAssertEqual(snapshot?.nextPrice, 2443)
+        XCTAssertEqual(snapshot?.recommendationAction, "wait")
         XCTAssertEqual(snapshot?.estimatedTankImpact, -40)
         XCTAssertEqual(snapshot?.confidenceText, "Forecast confidence: high")
         XCTAssertEqual(snapshot?.isStale, false)
@@ -62,6 +63,35 @@ final class FuelSharedTests: XCTestCase {
         XCTAssertEqual(cached.forecast.diesel50ppmEstimatedChangeCents, 55)
     }
 
+    func testNonOKRemotePayloadFallsBackWithoutReplacingCache() async throws {
+        var remotePayload = try samplePayload()
+        remotePayload.status = "error"
+        StubURLProtocol.responseData = try JSONEncoder().encode(remotePayload)
+        defer { StubURLProtocol.responseData = nil }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [StubURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { session.invalidateAndCancel() }
+
+        let cacheURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("fuel-data-cache.json")
+        let service = FuelDataService(
+            remoteURL: URL(string: "https://example.test/latest.json")!,
+            session: session,
+            bundle: .module,
+            cacheFileURL: cacheURL
+        )
+        try service.saveCachedPayload(samplePayload())
+
+        let loaded = try await service.loadPayload()
+
+        XCTAssertEqual(loaded.source, .cache)
+        XCTAssertEqual(loaded.payload.status, "ok")
+        XCTAssertEqual(try service.loadCachedPayload().status, "ok")
+    }
+
     private func samplePayload() throws -> FuelPayload {
         let url = Bundle.module.url(forResource: "fuel-data", withExtension: "json")!
         let data = try Data(contentsOf: url)
@@ -73,4 +103,27 @@ final class FuelSharedTests: XCTestCase {
         formatter.formatOptions = [.withInternetDateTime]
         return formatter.date(from: value)!
     }
+}
+
+private final class StubURLProtocol: URLProtocol {
+    nonisolated(unsafe) static var responseData: Data?
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard
+            let url = request.url,
+            let data = Self.responseData,
+            let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+        else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: data)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }

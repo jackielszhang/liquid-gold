@@ -1,0 +1,10 @@
+{
+  "name": "liquid-gold-prototype",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 4179 --directory .."
+  },
+  "devDependencies": {
+    "dialkit": "2.0.2"
+  }
+}

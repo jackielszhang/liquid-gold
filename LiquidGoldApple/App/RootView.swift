@@ -1,10 +1,7 @@
 import SwiftUI
 import WidgetKit
+import LiquidGoldShared
 
-/// Home screen: one question, fill now or wait.
-///
-/// Setup runs once. After that this view reloads JSON, flattens it with the
-/// stored selection, and tells WidgetKit to refresh from the same cache.
 struct RootView: View {
     @Environment(FuelSettingsStore.self) private var settingsStore
     @State private var loadedPayload: LoadedFuelPayload?
@@ -30,73 +27,93 @@ struct RootView: View {
                 }
             }
         }
-        .background(LiquidGoldTheme.backgroundSecondary.ignoresSafeArea())
-        .task {
-            await loadData()
-        }
+        .preferredColorScheme(.dark)
+        .tint(LiquidGoldTheme.ink)
+        .background(LiquidGoldTheme.background.ignoresSafeArea())
+        .task { await loadData() }
     }
 
     private var dashboard: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 12) {
                     header
                     if let snapshot {
                         SnapshotHero(snapshot: snapshot)
-                        MetricGrid(snapshot: snapshot)
+                        PriceSignal(snapshot: snapshot)
                         RecommendationPanel(snapshot: snapshot)
+                        MetricGrid(snapshot: snapshot)
                     } else if isLoading {
-                        ProgressView()
-                            .tint(LiquidGoldTheme.hardwareBlack)
+                        ProgressView("READING DATA")
+                            .font(LiquidGoldTheme.mono(12, weight: .bold))
+                            .padding(.top, 40)
                     } else {
                         MissingDataPanel(message: errorMessage ?? "Unable to load fuel data.")
                     }
+                    Text("LIQUID GOLD   /   FUEL INTELLIGENCE")
+                        .font(LiquidGoldTheme.mono(10, weight: .medium))
+                        .tracking(1)
+                        .foregroundStyle(LiquidGoldTheme.muted)
+                        .padding(.vertical, 20)
                 }
-                .padding(16)
+                .padding(.horizontal, 18)
+                .padding(.top, 12)
             }
-            .navigationTitle("Liquid Gold")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Reload") {
-                        Task { await loadData() }
-                    }
-                    .font(.system(.subheadline, design: .monospaced).weight(.semibold))
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Settings") {
-                        showingSettings = true
-                    }
-                    .font(.system(.subheadline, design: .rounded).weight(.bold))
-                }
-            }
+            .background(LiquidGoldTheme.background)
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showingSettings) {
                 if let current = settingsStore.selection {
                     SettingsView(initialSelection: current) { selection in
                         settingsStore.update(selection: selection)
                         showingSettings = false
                     }
-                    .presentationDetents([.medium])
+                    .presentationDetents([.large])
                 }
             }
-            .refreshable {
-                await loadData()
-            }
+            .refreshable { await loadData() }
         }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("FUEL TIMING")
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .tracking(1.2)
-            Text("Should you fill now or wait?")
-                .font(.system(.title3, design: .rounded).weight(.bold))
-            Text(snapshot?.statusText ?? (isLoading ? "Loading live pricing..." : "Waiting for your selection"))
-                .font(.system(.footnote, design: .monospaced))
-                .foregroundStyle(LiquidGoldTheme.textSecondary)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                Text("LG / 001")
+                    .font(LiquidGoldTheme.mono(13, weight: .bold))
+                    .tracking(1)
+                Spacer()
+                Button {
+                    Task { await loadData() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .frame(width: 44, height: 44)
+                }
+                .accessibilityLabel("Reload fuel data")
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "slider.horizontal.3")
+                        .frame(width: 44, height: 44)
+                }
+                .accessibilityLabel("Settings")
+            }
+            .foregroundStyle(LiquidGoldTheme.ink)
+            .font(LiquidGoldTheme.mono(19))
+            Text("FUEL\nTIMING")
+                .font(LiquidGoldTheme.mono(48, weight: .black))
+                .tracking(-3)
+                .lineSpacing(-8)
+                .fixedSize(horizontal: false, vertical: true)
+                .foregroundStyle(LiquidGoldTheme.ink)
+            HStack(spacing: 9) {
+                Circle().fill(LiquidGoldTheme.ink).frame(width: 6, height: 6)
+                Text(snapshot?.statusText.uppercased() ?? (isLoading ? "READING LIVE DATA" : "AWAITING DATA"))
+                    .font(LiquidGoldTheme.mono(11, weight: .medium))
+                    .tracking(0.6)
+                    .foregroundStyle(LiquidGoldTheme.muted)
+            }
+            Rectangle().fill(LiquidGoldTheme.rule).frame(height: 1)
         }
-        .foregroundStyle(LiquidGoldTheme.hardwareBlack)
+        .padding(.bottom, 10)
     }
 
     @MainActor
@@ -113,7 +130,6 @@ struct RootView: View {
     }
 }
 
-/// First-launch form. Tank size is only used for the rand-impact estimate.
 private struct SetupView: View {
     @State private var region: RegionType = .coastal
     @State private var fuelType: FuelType = .petrol95
@@ -121,34 +137,31 @@ private struct SetupView: View {
     let onContinue: (RegionType, FuelType, Int) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Spacer()
-            Text("LIQUID GOLD")
-                .font(.system(size: 40, weight: .heavy, design: .rounded))
-            Text("Choose your region, fuel, and tank size once. Liquid Gold only answers one question: fill now or wait.")
-                .font(.system(.body, design: .default))
-                .foregroundStyle(LiquidGoldTheme.textSecondary)
-            PickerPanel(title: "Region", options: RegionType.allCases, selection: $region) { $0.title }
-            PickerPanel(title: "Fuel", options: FuelType.allCases, selection: $fuelType) { $0.title }
-            TankSizePanel(tankSizeLitres: $tankSizeLitres)
-            Button {
-                onContinue(region, fuelType, tankSizeLitres)
-            } label: {
-                Text("Continue")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(LiquidGoldTheme.signal)
-                    .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(LiquidGoldTheme.hardwareBlack, lineWidth: 2)
-                    )
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("LG / INITIAL CONFIGURATION")
+                    .font(LiquidGoldTheme.mono(11, weight: .bold))
+                    .tracking(1)
+                    .foregroundStyle(LiquidGoldTheme.muted)
+                    .padding(.top, 36)
+                Text("FUEL\nTIMING")
+                    .font(LiquidGoldTheme.mono(48, weight: .black))
+                    .tracking(-3)
+                    .foregroundStyle(LiquidGoldTheme.ink)
+                Text("Set your region, fuel and tank size to see when to fill.")
+                    .font(LiquidGoldTheme.mono(14))
+                    .foregroundStyle(LiquidGoldTheme.muted)
+                    .padding(.bottom, 12)
+                PickerPanel(title: "01 / REGION", options: RegionType.allCases, selection: $region) { $0.title }
+                PickerPanel(title: "02 / FUEL", options: FuelType.allCases, selection: $fuelType) { $0.title }
+                TankSizePanel(tankSizeLitres: $tankSizeLitres)
+                ActionButton(title: "SHOW MY SIGNAL", action: {
+                    onContinue(region, fuelType, tankSizeLitres)
+                })
             }
-            .buttonStyle(.plain)
-            Spacer()
+            .padding(18)
         }
-        .padding(20)
-        .background(LiquidGoldTheme.backgroundSecondary.ignoresSafeArea())
+        .background(LiquidGoldTheme.background.ignoresSafeArea())
     }
 }
 
@@ -164,30 +177,52 @@ private struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                PickerPanel(title: "Region", options: RegionType.allCases, selection: $selection.region) { $0.title }
-                PickerPanel(title: "Fuel", options: FuelType.allCases, selection: $selection.fuelType) { $0.title }
-                TankSizePanel(tankSizeLitres: $selection.tankSizeLitres)
-                Button("Save") {
-                    onSave(selection)
-                    dismiss()
+            ScrollView {
+                VStack(spacing: 14) {
+                    PickerPanel(title: "01 / REGION", options: RegionType.allCases, selection: $selection.region) { $0.title }
+                    PickerPanel(title: "02 / FUEL", options: FuelType.allCases, selection: $selection.fuelType) { $0.title }
+                    TankSizePanel(tankSizeLitres: $selection.tankSizeLitres)
+                    ActionButton(title: "SAVE CONFIGURATION", action: {
+                        onSave(selection)
+                        dismiss()
+                    })
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(LiquidGoldTheme.signal)
-                .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(LiquidGoldTheme.hardwareBlack, lineWidth: 2)
-                )
-                .buttonStyle(.plain)
-                Spacer()
+                .padding(18)
             }
-            .padding(20)
-            .background(LiquidGoldTheme.backgroundSecondary.ignoresSafeArea())
-            .navigationTitle("Settings")
+            .background(LiquidGoldTheme.background.ignoresSafeArea())
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(LiquidGoldTheme.background, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("CONFIGURATION")
+                        .font(LiquidGoldTheme.mono(13, weight: .bold))
+                        .tracking(1)
+                        .foregroundStyle(LiquidGoldTheme.ink)
+                }
+            }
         }
+    }
+}
+
+private struct ActionButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+            }
+            .font(LiquidGoldTheme.mono(14, weight: .bold))
+            .padding(18)
+            .frame(maxWidth: .infinity)
+            .foregroundStyle(LiquidGoldTheme.background)
+            .background(LiquidGoldTheme.ink)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -196,21 +231,21 @@ private struct TankSizePanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Tank Size".uppercased())
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .tracking(1.0)
+            PanelLabel(text: "03 / TANK SIZE")
             HStack {
-                Text("\(tankSizeLitres)L")
-                    .font(.system(.title3, design: .monospaced).weight(.bold))
+                Text("\(tankSizeLitres) L")
+                    .font(LiquidGoldTheme.mono(30, weight: .bold))
                 Spacer()
-                Stepper("", value: $tankSizeLitres, in: 20...120, step: 5)
+                Stepper("Tank size in litres", value: $tankSizeLitres, in: 20...120, step: 5)
                     .labelsHidden()
+                    .tint(LiquidGoldTheme.ink)
             }
-            Text("Used to estimate the cost impact on your next fill.")
-                .font(.system(.footnote, design: .default))
-                .foregroundStyle(LiquidGoldTheme.textSecondary)
+            Text("Used to estimate the cost of your next fill.")
+                .font(LiquidGoldTheme.mono(11))
+                .foregroundStyle(LiquidGoldTheme.muted)
         }
-        .utilityPanel(background: LiquidGoldTheme.backgroundPrimary, shadow: 4)
+        .foregroundStyle(LiquidGoldTheme.ink)
+        .instrumentPanel()
     }
 }
 
@@ -221,53 +256,151 @@ private struct PickerPanel<Option: Hashable>: View {
     let label: (Option) -> String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title.uppercased())
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .tracking(1.0)
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
+            PanelLabel(text: title)
+            HStack(spacing: 8) {
                 ForEach(options, id: \.self) { option in
                     Button {
                         selection = option
                     } label: {
-                        Text(label(option))
-                            .font(.system(.subheadline, design: .monospaced).weight(.semibold))
+                        Text(label(option).uppercased())
+                            .font(LiquidGoldTheme.mono(12, weight: .bold))
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(selection == option ? LiquidGoldTheme.signal : LiquidGoldTheme.backgroundPrimary)
-                            .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(LiquidGoldTheme.hardwareBlack, lineWidth: 2)
-                            )
+                            .padding(.vertical, 15)
+                            .foregroundStyle(selection == option ? LiquidGoldTheme.background : LiquidGoldTheme.ink)
+                            .background(selection == option ? LiquidGoldTheme.ink : LiquidGoldTheme.panel)
+                            .overlay(Rectangle().stroke(LiquidGoldTheme.rule, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(selection == option ? .isSelected : [])
                 }
             }
         }
-        .utilityPanel(background: LiquidGoldTheme.backgroundPrimary, shadow: 4)
+        .instrumentPanel()
     }
 }
 
-/// LCD-style price panel. Orange is reserved for the selected control, not this readout.
+private struct PanelLabel: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(LiquidGoldTheme.mono(11, weight: .bold))
+            .tracking(1.2)
+            .foregroundStyle(LiquidGoldTheme.muted)
+    }
+}
+
 private struct SnapshotHero: View {
     let snapshot: FuelSnapshot
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("\(snapshot.selection.region.title) • \(snapshot.selection.fuelType.title)")
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .tracking(1)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                PanelLabel(text: "01 / PUMP PRICE")
+                Spacer()
+                Image(systemName: "asterisk")
+                    .font(LiquidGoldTheme.mono(16, weight: .bold))
+            }
             Text(PriceFormatter.currencyPerLitre(cents: snapshot.currentPrice))
-                .font(.system(size: 38, weight: .bold, design: .monospaced))
-            HStack(spacing: 12) {
-                ChangeBadge(change: snapshot.change)
-                Text(snapshot.recommendationText)
-                    .font(.system(.headline, design: .rounded).weight(.bold))
+                .font(LiquidGoldTheme.mono(45, weight: .bold))
+                .minimumScaleFactor(0.65)
+                .lineLimit(1)
+                .tracking(-2)
+            HStack {
+                Text(snapshot.selection.fuelType.title.uppercased())
+                Spacer()
+                Text(snapshot.selection.region.title.uppercased())
+            }
+            .font(LiquidGoldTheme.mono(11, weight: .bold))
+            .tracking(0.6)
+            Rectangle().fill(LiquidGoldTheme.rule).frame(height: 1)
+            HStack {
+                Text("NEXT / \(PriceFormatter.currencyPerLitre(cents: snapshot.nextPrice))")
+                Spacer()
+                Text(PriceFormatter.delta(cents: snapshot.change))
+                    .fontWeight(.bold)
+            }
+            .font(LiquidGoldTheme.mono(12))
+        }
+        .foregroundStyle(LiquidGoldTheme.ink)
+        .instrumentPanel()
+    }
+}
+
+private struct PriceSignal: View {
+    let snapshot: FuelSnapshot
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                PanelLabel(text: "02 / PRICE VECTOR")
+                Spacer()
+                Text("C/L")
+                    .font(LiquidGoldTheme.mono(11, weight: .bold))
+                    .foregroundStyle(LiquidGoldTheme.muted)
+            }
+            if let change = snapshot.change {
+                PriceVectorGraphic(change: change)
+                    .frame(height: 142)
+                    .accessibilityHidden(true)
+            } else {
+                Text("PROJECTION UNAVAILABLE")
+                    .font(LiquidGoldTheme.mono(12, weight: .bold))
+                    .foregroundStyle(LiquidGoldTheme.muted)
+                    .frame(height: 142)
+            }
+            HStack {
+                Text("NOW")
+                Spacer()
+                Text("NEXT ADJUSTMENT")
+            }
+            .font(LiquidGoldTheme.mono(10, weight: .bold))
+            .tracking(0.6)
+            .foregroundStyle(LiquidGoldTheme.muted)
+            Text("\(PriceFormatter.delta(cents: snapshot.change)) PER LITRE")
+                .font(LiquidGoldTheme.mono(24, weight: .bold))
+                .foregroundStyle(LiquidGoldTheme.ink)
+                .accessibilityLabel("Projected price change: \(PriceFormatter.delta(cents: snapshot.change)) per litre")
+            if snapshot.change != nil {
+                Text("VECTOR SHOWS DIRECTION; UP TO 100C SCALE")
+                    .font(LiquidGoldTheme.mono(9))
+                    .foregroundStyle(LiquidGoldTheme.muted)
             }
         }
-        .foregroundStyle(LiquidGoldTheme.lcdDark)
-        .utilityPanel(background: LiquidGoldTheme.lcd, shadow: 6)
+        .instrumentPanel()
+    }
+}
+
+private struct RecommendationPanel: View {
+    let snapshot: FuelSnapshot
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            PanelLabel(text: "03 / DECISION")
+            Text(snapshot.recommendationText.uppercased())
+                .font(LiquidGoldTheme.mono(30, weight: .black))
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(snapshot.recommendationBody)
+                .font(LiquidGoldTheme.mono(13))
+                .foregroundStyle(LiquidGoldTheme.muted)
+            Rectangle().fill(LiquidGoldTheme.rule).frame(height: 1)
+            Text(impactLine)
+                .font(LiquidGoldTheme.mono(12, weight: .bold))
+            Text(snapshot.confidenceText.uppercased())
+                .font(LiquidGoldTheme.mono(10))
+                .foregroundStyle(LiquidGoldTheme.muted)
+        }
+        .foregroundStyle(LiquidGoldTheme.ink)
+        .instrumentPanel()
+    }
+
+    private var impactLine: String {
+        guard let impact = snapshot.estimatedTankImpact else { return "Tank impact unavailable." }
+        if impact > 0 { return "WAITING COSTS ~\(PriceFormatter.randAmount(impact)) / \(snapshot.selection.tankSizeLitres)L" }
+        if impact < 0 { return "WAITING SAVES ~\(PriceFormatter.randAmount(impact)) / \(snapshot.selection.tankSizeLitres)L" }
+        return "NO MATERIAL COST CHANGE / \(snapshot.selection.tankSizeLitres)L"
     }
 }
 
@@ -275,15 +408,9 @@ private struct MetricGrid: View {
     let snapshot: FuelSnapshot
 
     var body: some View {
-        VStack(spacing: 14) {
-            HStack(spacing: 14) {
-                MetricCard(title: "Next Price", value: PriceFormatter.currencyPerLitre(cents: snapshot.nextPrice))
-                MetricCard(title: "Tank Impact", value: PriceFormatter.rand(snapshot.estimatedTankImpact))
-            }
-            HStack(spacing: 14) {
-                MetricCard(title: "Next Adjustment", value: PriceFormatter.shortDate(snapshot.nextAdjustmentDate))
-                MetricCard(title: "Best Fill Date", value: PriceFormatter.shortDate(snapshot.bestFillUpDate))
-            }
+        HStack(alignment: .top, spacing: 12) {
+            MetricCard(title: "04 / ADJUSTMENT", value: PriceFormatter.shortDate(snapshot.nextAdjustmentDate))
+            MetricCard(title: "05 / BEST FILL", value: PriceFormatter.shortDate(snapshot.bestFillUpDate))
         }
     }
 }
@@ -293,61 +420,15 @@ private struct MetricCard: View {
     let value: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title.uppercased())
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .tracking(0.8)
-            Text(value)
-                .font(.system(.title3, design: .monospaced).weight(.bold))
+        VStack(alignment: .leading, spacing: 14) {
+            PanelLabel(text: title)
+            Text(value.uppercased())
+                .font(LiquidGoldTheme.mono(17, weight: .bold))
+                .minimumScaleFactor(0.75)
+                .lineLimit(1)
+                .foregroundStyle(LiquidGoldTheme.ink)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-        .utilityPanel(background: LiquidGoldTheme.backgroundPrimary, shadow: 4)
-    }
-}
-
-private struct RecommendationPanel: View {
-    let snapshot: FuelSnapshot
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Recommendation".uppercased())
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .tracking(0.8)
-            Text(snapshot.recommendationText)
-                .font(.system(.title3, design: .rounded).weight(.bold))
-            Text(snapshot.recommendationBody)
-                .font(.system(.headline, design: .rounded))
-            Text(impactLine)
-                .font(.system(.subheadline, design: .monospaced).weight(.semibold))
-            Text(snapshot.confidenceText)
-                .font(.system(.footnote, design: .monospaced))
-                .foregroundStyle(LiquidGoldTheme.textSecondary)
-            Text(reasonLine)
-                .font(.system(.subheadline, design: .default))
-                .foregroundStyle(LiquidGoldTheme.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-        .utilityPanel(background: LiquidGoldTheme.signalMuted, shadow: 4)
-    }
-
-    private var impactLine: String {
-        guard let impact = snapshot.estimatedTankImpact else { return "Tank impact unavailable." }
-        if impact > 0 {
-            return "Waiting likely costs about \(PriceFormatter.randAmount(impact)) on a \(snapshot.selection.tankSizeLitres)L fill."
-        }
-        if impact < 0 {
-            return "Waiting likely saves about \(PriceFormatter.randAmount(impact)) on a \(snapshot.selection.tankSizeLitres)L fill."
-        }
-        return "No material cost change on a \(snapshot.selection.tankSizeLitres)L fill."
-    }
-
-    private var reasonLine: String {
-        guard let change = snapshot.change else { return snapshot.statusText }
-        if change > 0 { return "Projected up \(PriceFormatter.delta(cents: change)) by the next adjustment." }
-        if change < 0 { return "Projected down \(PriceFormatter.delta(cents: change)) by the next adjustment." }
-        return "Projected flat by the next adjustment."
+        .instrumentPanel()
     }
 }
 
@@ -355,35 +436,13 @@ private struct MissingDataPanel: View {
     let message: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("No Data")
-                .font(.system(.headline, design: .rounded).weight(.bold))
+        VStack(alignment: .leading, spacing: 12) {
+            PanelLabel(text: "00 / SIGNAL UNAVAILABLE")
             Text(message)
-                .font(.system(.body, design: .default))
+                .font(LiquidGoldTheme.mono(14))
+                .foregroundStyle(LiquidGoldTheme.ink)
         }
-        .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-        .utilityPanel(background: LiquidGoldTheme.backgroundPrimary, shadow: 4)
-    }
-}
-
-private struct ChangeBadge: View {
-    let change: Int?
-
-    private var background: Color {
-        guard let change else { return LiquidGoldTheme.backgroundPrimary }
-        return change > 0 ? LiquidGoldTheme.signalMuted : Color(red: 0.882, green: 0.945, blue: 0.910)
-    }
-
-    var body: some View {
-        Text(PriceFormatter.delta(cents: change))
-            .font(.system(.subheadline, design: .monospaced).weight(.bold))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(background)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(LiquidGoldTheme.hardwareBlack, lineWidth: 2)
-            )
+        .instrumentPanel()
     }
 }
 

@@ -1,43 +1,70 @@
 import SwiftUI
 
-/// Apollo Utility tokens translated into SwiftUI colours.
-///
-/// Orange is a signal, not a theme. Hard offset shadows and 2px black borders
-/// are the depth language; do not replace them with blur.
 public enum LiquidGoldTheme {
-    public static let backgroundPrimary = Color(red: 0.961, green: 0.945, blue: 0.957)
-    public static let backgroundSecondary = Color(red: 0.910, green: 0.890, blue: 0.898)
-    public static let hardwareBlack = Color(red: 0.071, green: 0.071, blue: 0.078)
-    public static let signal = Color(red: 1.0, green: 0.290, blue: 0.098)
-    public static let signalMuted = Color(red: 1.0, green: 0.878, blue: 0.835)
-    public static let lcd = Color(red: 0.835, green: 0.816, blue: 0.718)
-    public static let lcdDark = Color(red: 0.141, green: 0.149, blue: 0.122)
-    public static let textSecondary = Color(red: 0.337, green: 0.329, blue: 0.353)
-    public static let border = hardwareBlack
-    public static let positive = Color(red: 0.176, green: 0.416, blue: 0.310)
+    public static let background = Color(red: 0.075, green: 0.079, blue: 0.075)
+    public static let panel = Color(red: 0.125, green: 0.133, blue: 0.125)
+    public static let ink = Color(red: 0.936, green: 0.918, blue: 0.867)
+    public static let muted = Color(red: 0.648, green: 0.646, blue: 0.615)
+    public static let rule = Color(red: 0.310, green: 0.322, blue: 0.302)
+
+    public static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .system(size: size, weight: weight, design: .monospaced)
+    }
 }
 
 public struct PanelStyle: ViewModifier {
-    let background: Color
-    let shadow: CGFloat
-
     public func body(content: Content) -> some View {
         content
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(background)
-                    .shadow(color: LiquidGoldTheme.border, radius: 0, x: shadow, y: shadow)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(LiquidGoldTheme.border, lineWidth: 2)
-            )
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(LiquidGoldTheme.panel)
+            .overlay(Rectangle().stroke(LiquidGoldTheme.rule, lineWidth: 1))
     }
 }
 
 public extension View {
-    func utilityPanel(background: Color = LiquidGoldTheme.backgroundPrimary, shadow: CGFloat = 5) -> some View {
-        modifier(PanelStyle(background: background, shadow: shadow))
+    func instrumentPanel() -> some View {
+        modifier(PanelStyle())
+    }
+}
+
+public struct PriceVectorGraphic: View {
+    public let change: Int
+    public let columns: Int
+    public let rows: Int
+
+    public init(change: Int, columns: Int = 21, rows: Int = 7) {
+        self.change = change
+        self.columns = columns
+        self.rows = rows
+    }
+
+    public var body: some View {
+        Canvas { context, size in
+            let left = size.width * 0.10
+            let right = size.width * 0.90
+            let middle = size.height * 0.5
+            let travel = min(CGFloat(change.magnitude) / 100, 1) * size.height * 0.34
+            let nextY = middle - (change > 0 ? travel : -travel)
+
+            for column in 0..<columns {
+                for row in 0..<rows {
+                    let point = CGPoint(x: left + CGFloat(column) * (right - left) / CGFloat(columns - 1),
+                                        y: size.height * 0.12 + CGFloat(row) * size.height * 0.75 / CGFloat(rows - 1))
+                    context.fill(Path(ellipseIn: CGRect(x: point.x - 1.5, y: point.y - 1.5, width: 3, height: 3)),
+                                 with: .color(LiquidGoldTheme.rule))
+                }
+            }
+            var path = Path()
+            path.move(to: CGPoint(x: left, y: middle))
+            path.addLine(to: CGPoint(x: right, y: nextY))
+            context.stroke(path, with: .color(LiquidGoldTheme.ink), style: StrokeStyle(lineWidth: 2))
+            for point in [CGPoint(x: left, y: middle), CGPoint(x: right, y: nextY)] {
+                context.fill(Path(ellipseIn: CGRect(x: point.x - 6, y: point.y - 6, width: 12, height: 12)),
+                             with: .color(LiquidGoldTheme.ink))
+                context.fill(Path(ellipseIn: CGRect(x: point.x - 2, y: point.y - 2, width: 4, height: 4)),
+                             with: .color(LiquidGoldTheme.panel))
+            }
+        }
     }
 }

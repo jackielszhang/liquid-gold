@@ -42,6 +42,10 @@ python scripts/update_fuel_data.py
 python -m unittest discover -s tests -p 'test_*.py'
 ```
 
+## Run the iOS app
+
+Open `LiquidGoldApple/LiquidGold.xcodeproj` in Xcode, select the `LiquidGold` scheme and an iOS 17+ simulator, then press **Run**. The project includes the WidgetKit extension; add Liquid Gold from the simulator's widget gallery after launching the app.
+
 Every pipeline run uses live sources and fails without publishing if discovery, download, parsing, or validation fails. Fixtures are only parser test inputs.
 
 Optional environment variables:
@@ -71,9 +75,9 @@ Diesel **0.005% sulphur** maps to `diesel_50ppm`. Do not use the 0.05% column.
 
 Edit [data/manual-override.json](data/manual-override.json) and set `enabled` to `true`.
 
-- `prices` replaces parsed prices.
-- `forecast` overrides parsed forecast fields.
-- The script still attempts normal parsing and logs failures.
+- `prices` replaces parsed prices; `forecast` overrides parsed forecast fields.
+- Overrides apply after required live sources have been downloaded and parsed. A missing or invalid required source still stops publishing, so this file does not recover from a source outage.
+- The final overridden dataset still passes normal validation before publishing.
 
 ## Parsing rules
 

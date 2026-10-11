@@ -1,5 +1,6 @@
 import SwiftUI
 import WidgetKit
+import LiquidGoldShared
 
 /// Home-screen widget backed by the same JSON and settings as the app.
 ///
@@ -61,80 +62,115 @@ struct LiquidGoldWidgetEntryView: View {
         Group {
             if let snapshot = entry.snapshot {
                 switch family {
-                case .systemMedium:
-                    mediumWidget(snapshot: snapshot)
-                default:
-                    smallWidget(snapshot: snapshot)
+                case .systemMedium: mediumWidget(snapshot: snapshot)
+                default: smallWidget(snapshot: snapshot)
                 }
             } else {
-                Text("No fuel data")
-                    .font(.system(.headline, design: .rounded))
-                    .foregroundStyle(LiquidGoldTheme.hardwareBlack)
+                Text("SIGNAL UNAVAILABLE")
+                    .font(LiquidGoldTheme.mono(13, weight: .bold))
+                    .foregroundStyle(LiquidGoldTheme.ink)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(LiquidGoldTheme.backgroundPrimary)
             }
         }
-        .containerBackground(LiquidGoldTheme.backgroundPrimary, for: .widget)
+        .containerBackground(LiquidGoldTheme.background, for: .widget)
     }
 
     private func smallWidget(snapshot: FuelSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(snapshot.selection.fuelType.title.uppercased())
-                .font(.system(size: 10, weight: .bold, design: .rounded))
-                .tracking(0.8)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text("LG / \(snapshot.selection.fuelType == .petrol95 ? "P95" : "D50")")
+                Spacer()
+                Text(snapshot.isStale ? "STALE" : "LIVE")
+            }
+            .font(LiquidGoldTheme.mono(9, weight: .bold))
+            .tracking(0.5)
+            .foregroundStyle(LiquidGoldTheme.muted)
             Text(PriceFormatter.currencyPerLitre(cents: snapshot.currentPrice))
-                .font(.system(size: 24, weight: .bold, design: .monospaced))
-            Text(PriceFormatter.delta(cents: snapshot.change))
-                .font(.system(.headline, design: .monospaced).weight(.bold))
-                .foregroundStyle((snapshot.change ?? 0) > 0 ? LiquidGoldTheme.signal : LiquidGoldTheme.positive)
-            Spacer()
-            Text("Best: \(PriceFormatter.shortDate(snapshot.bestFillUpDate))")
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .font(LiquidGoldTheme.mono(22, weight: .bold))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            if let change = snapshot.change {
+                PriceVectorGraphic(change: change, columns: 9, rows: 3)
+                    .frame(height: 28)
+                    .accessibilityHidden(true)
+            }
+            Rectangle().fill(LiquidGoldTheme.rule).frame(height: 1)
+            HStack {
+                Text(PriceFormatter.delta(cents: snapshot.change))
+                    .font(LiquidGoldTheme.mono(17, weight: .bold))
+                Spacer()
+                Text("C/L")
+                    .font(LiquidGoldTheme.mono(9, weight: .bold))
+                    .foregroundStyle(LiquidGoldTheme.muted)
+            }
+            Text(shortAction(snapshot.recommendationAction))
+                .font(LiquidGoldTheme.mono(11, weight: .bold))
+                .lineLimit(1)
         }
-        .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-        .padding(14)
-        .background(LiquidGoldTheme.lcd)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(LiquidGoldTheme.hardwareBlack, lineWidth: 2)
-        )
+        .foregroundStyle(LiquidGoldTheme.ink)
+        .padding(11)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(LiquidGoldTheme.panel)
+        .overlay(Rectangle().stroke(LiquidGoldTheme.rule, lineWidth: 1))
     }
 
     private func mediumWidget(snapshot: FuelSnapshot) -> some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(snapshot.selection.region.title.uppercased())
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .tracking(0.8)
-                Text(snapshot.selection.fuelType.title)
-                    .font(.system(.headline, design: .rounded).weight(.bold))
-                Text(PriceFormatter.currencyPerLitre(cents: snapshot.currentPrice))
-                    .font(.system(size: 26, weight: .bold, design: .monospaced))
-                Text("Next \(PriceFormatter.currencyPerLitre(cents: snapshot.nextPrice))")
-                    .font(.system(.subheadline, design: .monospaced))
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("LG / PRICE SIGNAL")
+                Spacer()
+                Text(snapshot.isStale ? "STALE" : "LIVE")
             }
-            Spacer()
-            VStack(alignment: .leading, spacing: 8) {
-                Text(PriceFormatter.delta(cents: snapshot.change))
-                    .font(.system(.title3, design: .monospaced).weight(.bold))
-                    .foregroundStyle((snapshot.change ?? 0) > 0 ? LiquidGoldTheme.signal : LiquidGoldTheme.positive)
-                Text("Best \(PriceFormatter.shortDate(snapshot.bestFillUpDate))")
-                    .font(.system(.subheadline, design: .monospaced))
-                Text("Adj \(PriceFormatter.shortDate(snapshot.nextAdjustmentDate))")
-                    .font(.system(.subheadline, design: .monospaced))
-                Text(snapshot.recommendationText)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .lineLimit(2)
+            .font(LiquidGoldTheme.mono(9, weight: .bold))
+            .tracking(0.5)
+            .foregroundStyle(LiquidGoldTheme.muted)
+            HStack(alignment: .bottom, spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(PriceFormatter.currencyPerLitre(cents: snapshot.currentPrice))
+                        .font(LiquidGoldTheme.mono(27, weight: .bold))
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
+                    Text("\(snapshot.selection.fuelType.title.uppercased()) / \(snapshot.selection.region.title.uppercased())")
+                        .font(LiquidGoldTheme.mono(9, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 0)
+                VStack(alignment: .trailing, spacing: 5) {
+                    Text(PriceFormatter.delta(cents: snapshot.change))
+                        .font(LiquidGoldTheme.mono(24, weight: .bold))
+                    Text("NEXT / \(PriceFormatter.shortDate(snapshot.nextAdjustmentDate).uppercased())")
+                        .font(LiquidGoldTheme.mono(9, weight: .bold))
+                        .foregroundStyle(LiquidGoldTheme.muted)
+                }
             }
+            if let change = snapshot.change {
+                PriceVectorGraphic(change: change, columns: 17, rows: 3)
+                    .frame(height: 38)
+                    .accessibilityHidden(true)
+            }
+            Rectangle().fill(LiquidGoldTheme.rule).frame(height: 1)
+            Text(snapshot.recommendationText.uppercased())
+                .font(LiquidGoldTheme.mono(10, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
-        .foregroundStyle(LiquidGoldTheme.hardwareBlack)
-        .padding(14)
-        .background(LiquidGoldTheme.backgroundPrimary)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(LiquidGoldTheme.hardwareBlack, lineWidth: 2)
-        )
+        .foregroundStyle(LiquidGoldTheme.ink)
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(LiquidGoldTheme.panel)
+        .overlay(Rectangle().stroke(LiquidGoldTheme.rule, lineWidth: 1))
     }
+
+    private func shortAction(_ action: String) -> String {
+        switch action {
+        case "fill_now": "FILL NOW"
+        case "wait": "WAIT"
+        case "fill_normally": "FILL NORMALLY"
+        default: "CHECK FORECAST"
+        }
+    }
+
 }
 
 @main
