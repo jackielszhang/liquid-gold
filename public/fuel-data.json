@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "last_updated": "2026-10-17T10:50:32Z",
+  "last_updated": "2026-10-18T11:14:18Z",
   "status": "ok",
   "manual_override": false,
   "next_adjustment_date": "2026-11-04",
@@ -27,7 +27,7 @@
     "diesel_50ppm_estimated_change_cents": 138,
     "direction": "up",
     "diesel_50ppm_direction": "up",
-    "confidence": "high",
+    "confidence": "low",
     "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-15-10-2026.pdf"
   },
   "recommendation": {
