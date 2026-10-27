@@ -2,7 +2,7 @@
   "schema_version": 2,
   "api_version": "v1",
   "month": "2026-10",
-  "generated_at": "2026-10-26T13:11:15Z",
+  "generated_at": "2026-10-27T12:19:31Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "official": {
     "effective_date": "2026-10-07",
@@ -156,6 +156,15 @@
       "diesel_50ppm_direction": "up",
       "confidence": "low",
       "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-23-10-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-10-26",
+      "petrol_95_estimated_change_cents": 116,
+      "diesel_50ppm_estimated_change_cents": 132,
+      "direction": "up",
+      "diesel_50ppm_direction": "up",
+      "confidence": "high",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-26-10-2026.pdf"
     }
   ]
 }

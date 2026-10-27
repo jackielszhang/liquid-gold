@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "last_updated": "2026-10-26T13:11:15Z",
+  "last_updated": "2026-10-27T12:19:31Z",
   "status": "ok",
   "manual_override": false,
   "next_adjustment_date": "2026-11-04",
@@ -22,43 +22,43 @@
   },
   "adjustments": {},
   "forecast": {
-    "as_of_date": "2026-10-23",
-    "petrol_95_estimated_change_cents": 120,
-    "diesel_50ppm_estimated_change_cents": 129,
+    "as_of_date": "2026-10-26",
+    "petrol_95_estimated_change_cents": 116,
+    "diesel_50ppm_estimated_change_cents": 132,
     "direction": "up",
     "diesel_50ppm_direction": "up",
-    "confidence": "low",
-    "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-23-10-2026.pdf"
+    "confidence": "high",
+    "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-26-10-2026.pdf"
   },
   "recommendation": {
     "petrol_95": {
       "action": "fill_now",
       "headline": "Fill before the next change",
       "body": "A higher price is currently estimated for the next adjustment.",
-      "reason": "Petrol 95 is currently estimated to increase by about 120c/L.",
+      "reason": "Petrol 95 is currently estimated to increase by about 116c/L.",
       "best_fill_up_date": "2026-11-03",
       "next_price_cents_per_litre": {
-        "coastal_cents_per_litre": 3058,
-        "inland_cents_per_litre": 3145
+        "coastal_cents_per_litre": 3054,
+        "inland_cents_per_litre": 3141
       },
-      "change_cents_per_litre": 120
+      "change_cents_per_litre": 116
     },
     "diesel_50ppm": {
       "action": "fill_now",
       "headline": "Fill before the next change",
       "body": "A higher price is currently estimated for the next adjustment.",
-      "reason": "Diesel 50ppm is currently estimated to increase by about 129c/L.",
+      "reason": "Diesel 50ppm is currently estimated to increase by about 132c/L.",
       "best_fill_up_date": "2026-11-03",
       "next_price_cents_per_litre": {
-        "coastal_cents_per_litre": 3322,
-        "inland_cents_per_litre": 3409
+        "coastal_cents_per_litre": 3325,
+        "inland_cents_per_litre": 3412
       },
-      "change_cents_per_litre": 129
+      "change_cents_per_litre": 132
     }
   },
   "sources": {
     "official_prices_url": "https://bit.ly/4rPpgud",
-    "forecast_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-23-10-2026.pdf",
+    "forecast_url": "https://cefgroup.co.za/wp-content/uploads/2026/10/Daily-26-10-2026.pdf",
     "validation_url": ""
   }
 }
