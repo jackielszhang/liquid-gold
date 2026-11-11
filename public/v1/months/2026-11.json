@@ -2,22 +2,22 @@
   "schema_version": 2,
   "api_version": "v1",
   "month": "2026-11",
-  "generated_at": "2026-11-10T14:57:57Z",
+  "generated_at": "2026-11-11T14:28:51Z",
   "disclaimer": "Unofficial scrape of public CEF/DMPR figures. Not government data. Best-effort; may lag or fail if upstream layouts change.",
   "official": {
-    "effective_date": "2026-10-07",
+    "effective_date": "2026-11-04",
     "adjustment_cents": {},
     "prices": {
       "petrol_95": {
-        "coastal_cents_per_litre": 2938,
-        "inland_cents_per_litre": 3025
+        "coastal_cents_per_litre": 2937,
+        "inland_cents_per_litre": 3024
       },
       "diesel_50ppm": {
-        "coastal_cents_per_litre": 3193,
-        "inland_cents_per_litre": 3280
+        "coastal_cents_per_litre": 3073,
+        "inland_cents_per_litre": 3160
       }
     },
-    "source_url": "https://bit.ly/4rPpgud"
+    "source_url": "https://bit.ly/4sZwrAY"
   },
   "daily_forecasts": [
     {
@@ -73,6 +73,15 @@
       "diesel_50ppm_direction": "down",
       "confidence": "high",
       "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/11/Daily-09-11-2026.pdf"
+    },
+    {
+      "as_of_date": "2026-11-10",
+      "petrol_95_estimated_change_cents": -297,
+      "diesel_50ppm_estimated_change_cents": -116,
+      "direction": "down",
+      "diesel_50ppm_direction": "down",
+      "confidence": "high",
+      "source_url": "https://cefgroup.co.za/wp-content/uploads/2026/11/Daily-10-11-2026.pdf"
     }
   ]
 }
