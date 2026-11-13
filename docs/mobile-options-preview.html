@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Liquid Gold — Mobile path options</title>
+  <meta name="description" content="Minimal preview of how to ship Liquid Gold on Android and iOS, with home-screen widgets as the deciding factor." />
+
+  <!-- Expressive type: tech display + LCD-style mono (not Inter/system defaults) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Phosphor icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+
+  <style>
+    /* -------------------------------------------------------------------------- */
+    /* Design tokens — Apollo Utility (from design.md)                             */
+    /* -------------------------------------------------------------------------- */
+    :root {
+      --bg-primary: #f5f1f4;
+      --bg-secondary: #e8e3e5;
+      --bg-inverse: #121214;
+      --surface-lcd: #d5d0b7;
+      --surface-lcd-dark: #24261f;
+      --accent: #ff4a19;
+      --accent-hover: #e53c10;
+      --accent-muted: #ffe0d5;
+      --text-primary: #121214;
+      --text-secondary: #56545a;
+      --text-tertiary: #89858b;
+      --text-on-inverse: #f5f1f4;
+      --border: #121214;
+      --border-lcd: #777b63;
+      --status-positive: #2d6a4f;
+      --status-error: #a9270b;
+
+      --font-display: "Chakra Petch", sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+      --edge: 2px;
+      --shadow-hard: 4px 4px 0 var(--border);
+      --radius: 0;
+      --pad: clamp(1rem, 4vw, 1.5rem);
+      --max: 40rem;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Base                                                                        */
+    /* -------------------------------------------------------------------------- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font-mono);
+      font-size: 0.9375rem;
+      line-height: 1.55;
+      color: var(--text-primary);
+      background:
+        radial-gradient(ellipse 120% 80% at 50% -20%, #fff8f4 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background-attachment: fixed;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Layout shell                                                                */
+    /* -------------------------------------------------------------------------- */
+    .shell {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: var(--pad);
+      padding-bottom: calc(var(--pad) + 3rem);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Hero — one composition: brand, headline, one line, one cue                  */
+    /* -------------------------------------------------------------------------- */
+    .hero {
+      min-height: min(88dvh, 36rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-top: 2rem;
+      padding-bottom: 2.5rem;
+      border-bottom: var(--edge) solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Atmosphere: faint LCD grid, not a flat fill */
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border-lcd) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-lcd) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.12;
+      pointer-events: none;
+      mask-image: linear-gradient(180deg, transparent, #000 40%, #000);
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 12vw, 3.75rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      margin: 0 0 1.25rem;
+      position: relative;
+      animation: rise 0.55s ease-out both;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(1.15rem, 4.2vw, 1.35rem);
+      line-height: 1.25;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 0 0 0.75rem;
+      max-width: 18ch;
+      position: relative;
+      animation: rise 0.55s ease-out 0.08s both;
+    }
+
+    .hero-lead {
+      margin: 0 0 1.75rem;
+      color: var(--text-secondary);
+      max-width: 32ch;
+      position: relative;
+      animation: rise 0.55s ease-out 0.16s both;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-on-inverse);
+      background: var(--bg-inverse);
+      border: var(--edge) solid var(--border);
+      padding: 0.85rem 1.1rem;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      width: fit-content;
+      animation: rise 0.55s ease-out 0.24s both;
+      transition: background 160ms ease, transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .hero-cta:hover,
+    .hero-cta:focus-visible {
+      background: var(--accent);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .hero-cta:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--border);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Shared section rhythm                                                       */
+    /* -------------------------------------------------------------------------- */
+    section {
+      padding: 2.25rem 0;
+      border-bottom: var(--edge) solid var(--border);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin: 0 0 0.65rem;
+    }
+
+    .eyebrow i {
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.35rem, 5vw, 1.65rem);
+      line-height: 1.15;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin: 0 0 0.65rem;
+    }
+
+    .section-lead {
+      margin: 0 0 1.25rem;
+      color: var(--text-secondary);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Context strip — what you already have                                       */
+    /* -------------------------------------------------------------------------- */
+    .context-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .context-list li {
+      display: grid;
+      grid-template-columns: 1.25rem 1fr;
+      gap: 0.65rem;
+      align-items: start;
+      padding: 0.85rem 0.9rem;
+      background: var(--surface-lcd);
+      border: var(--edge) solid var(--border-lcd);
+    }
+
+    .context-list i {
+      margin-top: 0.1rem;
+      color: var(--surface-lcd-dark);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Widget filter — decision lens                                               */
+    /* -------------------------------------------------------------------------- */
+    .filter-panel {
+      background: var(--bg-inverse);
+      color: var(--text-on-inverse);
+      border: var(--edge) solid var(--border);
+      box-shadow: var(--shadow-hard);
+      padding: 1.15rem 1rem 1.25rem;
+    }
+
+    .filter-panel h2 {
+      color: var(--text-on-inverse);
+    }
+
+    .filter-panel .section-lead {
+      color: #b8b5ba;
+    }
+
+    .filter-grid {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .filter-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: start;
+      padding-top: 0.75rem;
+      border-top: 1px solid #2e2e32;
+    }
+
+    .filter-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .filter-item strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+      color: var(--accent);
+    }
+
+    .filter-item p {
+      margin: 0;
+      color: #c9c6cb;
+      font-size: 0.85rem;
+    }
+
+    .filter-item i {
+      color: var(--accent);
+      font-size: 1.15rem;
+      margin-top: 0.15rem;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Path options                                                                */
+    /* -------------------------------------------------------------------------- */
+    .paths {
+      display: grid;
+      gap: 1rem;
+    }
+
+    /* Interaction container: hard utility panel, not soft marketing card */
+    details.path {
+      border: var(--edge) solid var(--border);
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-hard);
+    }
+
+    details.path[open] {
+      background: #fff;
+    }
+
+    details.path summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 1rem 1rem 1.05rem;
+      display: grid;
+      gap: 0.55rem;
+      outline: none;
+    }
+
+    details.path summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.path summary:focus-visible {
+      background: var(--accent-muted);
+    }
+
+    .path-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .path-rank {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .path-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 0;
+    }
+
+    .chevron {
+      flex-shrink: 0;
+      transition: transform 160ms ease;
+      color: var(--text-secondary);
+    }
+
+    details.path[open] .chevron {
+      transform: rotate(180deg);
+      color: var(--accent);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .badge {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.45rem;
+      border: var(--edge) solid var(--border);
+      background: var(--bg-secondary);
+    }
+
+    .badge.widget-strong {
+      background: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .badge.widget-mid {
+      background: var(--surface-lcd);
+    }
+
+    .badge.widget-weak {
+      background: var(--bg-inverse);
+      color: var(--text-on-inverse);
+    }
+
+    .badge.recommend {
+      background: var(--status-positive);
+      color: #fff;
+      border-color: var(--status-positive);
+    }
+
+    .path-blurb {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .path-body {
+      padding: 0 1rem 1.15rem;
+      border-top: var(--edge) solid var(--border);
+      animation: openBody 180ms ease-out;
+    }
+
+    .compare {
+      display: grid;
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .compare-block h3 {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin: 0 0 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .compare-block.pros h3 {
+      color: var(--status-positive);
+    }
+
+    .compare-block.cons h3 {
+      color: var(--status-error);
+    }
+
+    .compare-block ul {
+      margin: 0;
+      padding: 0 0 0 1rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .compare-block li + li {
+      margin-top: 0.35rem;
+    }
+
+    .widget-note {
+      margin-top: 1rem;
+      padding: 0.75rem 0.85rem;
+      background: var(--surface-lcd);
+      border: var(--edge) solid var(--border-lcd);
+      font-size: 0.82rem;
+    }
+
+    .widget-note strong {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.3rem;
+      color: var(--surface-lcd-dark);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Verdict                                                                     */
+    /* -------------------------------------------------------------------------- */
+    .verdict-box {
+      border: var(--edge) solid var(--border);
+      background: var(--accent-muted);
+      padding: 1.1rem 1rem;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .verdict-box p {
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .verdict-box p + p {
+      margin-top: 0.75rem;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    .next-steps {
+      list-style: none;
+      margin: 1rem 0 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .next-steps li {
+      display: grid;
+      grid-template-columns: 1.5rem 1fr;
+      gap: 0.5rem;
+      align-items: start;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .next-steps span {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Footer                                                                      */
+    /* -------------------------------------------------------------------------- */
+    footer {
+      padding: 1.5rem 0 0.5rem;
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+    }
+
+    footer code {
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /* Motion                                                                      */
+    /* -------------------------------------------------------------------------- */
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes openBody {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .brand,
+      .hero h1,
+      .hero-lead,
+      .hero-cta,
+      .path-body {
+        animation: none;
+      }
+
+      .chevron {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+
+    <!-- ====================================================================== -->
+    <!-- Hero: brand first, one job, no secondary clutter                         -->
+    <!-- ====================================================================== -->
+    <header class="hero">
+      <p class="brand">Liquid <span>Gold</span></p>
+      <h1>Android + iOS without killing the widget</h1>
+      <p class="hero-lead">A short map of your options. Home-screen widgets are the filter — not an afterthought.</p>
+      <a class="hero-cta" href="#paths">
+        <i class="ph ph-caret-down" aria-hidden="true"></i>
+        See the paths
+      </a>
+    </header>
+
+    <!-- ====================================================================== -->
+    <!-- Where you are now                                                        -->
+    <!-- ====================================================================== -->
+    <section aria-labelledby="now-title">
+      <p class="eyebrow">
+        <i class="ph ph-map-pin" aria-hidden="true"></i>
+        Starting point
+      </p>
+      <h2 id="now-title">You already have an iOS client</h2>
+      <p class="section-lead">This repo is not a blank slate. That changes which path is smart.</p>
+
+      <ul class="context-list">
+        <li>
+          <i class="ph ph-apple-logo" aria-hidden="true"></i>
+          <span><strong>SwiftUI app</strong> for region, fuel, and tank size.</span>
+        </li>
+        <li>
+          <i class="ph ph-squares-four" aria-hidden="true"></i>
+          <span><strong>WidgetKit home widget</strong> reading the same cached snapshot.</span>
+        </li>
+        <li>
+          <i class="ph ph-database" aria-hidden="true"></i>
+          <span><strong>Shared JSON contract</strong> from the Python pipeline — already cross-platform friendly.</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ====================================================================== -->
+    <!-- Why widgets decide the architecture                                      -->
+    <!-- ====================================================================== -->
+    <section aria-labelledby="widget-title">
+      <div class="filter-panel">
+        <p class="eyebrow" style="color: #9a969c;">
+          <i class="ph ph-gauge" aria-hidden="true"></i>
+          Decision filter
+        </p>
+        <h2 id="widget-title">Widgets are first-class or you’re fighting the OS</h2>
+        <p class="section-lead">
+          A fill-now / wait answer lives on the home screen. Cross-platform UI kits help the app; they usually do not own the widget.
+        </p>
+
+        <div class="filter-grid">
+          <div class="filter-item">
+            <i class="ph ph-clock-countdown" aria-hidden="true"></i>
+            <div>
+              <strong>Refresh rules</strong>
+              <p>iOS WidgetKit and Android App Widgets / Glance both limit how often you can update. Native APIs handle this cleanly.</p>
+            </div>
+          </div>
+          <div class="filter-item">
+            <i class="ph ph-hard-drives" aria-hidden="true"></i>
+            <div>
+              <strong>Shared cache</strong>
+              <p>App and widget must read the same snapshot (you already do this with an app group on iOS).</p>
+            </div>
+          </div>
+          <div class="filter-item">
+            <i class="ph ph-warning-circle" aria-hidden="true"></i>
+            <div>
+              <strong>Web / PWA gap</strong>
+              <p>Installed web apps do not give you real home-screen widgets like Liquid Gold needs — especially on iOS.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================== -->
+    <!-- Option paths                                                             -->
+    <!-- ====================================================================== -->
+    <section id="paths" aria-labelledby="paths-title">
+      <p class="eyebrow">
+        <i class="ph ph-path" aria-hidden="true"></i>
+        Options
+      </p>
+      <h2 id="paths-title">Five paths, ranked by widget fit</h2>
+      <p class="section-lead">Tap a path for pros, cons, and what the widget work actually looks like.</p>
+
+      <div class="paths">
+
+        <!-- Path 1: Native twin -->
+        <details class="path" open>
+          <summary>
+            <div class="path-top">
+              <div>
+                <div class="path-rank">01 · strongest widgets</div>
+                <h3 class="path-title">Native twin</h3>
+              </div>
+              <i class="ph ph-caret-down chevron" aria-hidden="true"></i>
+            </div>
+            <div class="badge-row">
+              <span class="badge recommend">Best fit for you</span>
+              <span class="badge widget-strong">Widget: excellent</span>
+            </div>
+            <p class="path-blurb">Keep SwiftUI + WidgetKit. Add Kotlin / Jetpack Compose + Glance (or App Widgets) on Android. Share only the JSON + rules.</p>
+          </summary>
+          <div class="path-body">
+            <div class="compare">
+              <div class="compare-block pros">
+                <h3><i class="ph ph-plus-circle" aria-hidden="true"></i> Pros</h3>
+                <ul>
+                  <li>Best home-screen widgets on both platforms — no bridge tax.</li>
+                  <li>You keep the iOS work you already shipped.</li>
+                  <li>Data pipeline stays untouched; both apps fetch the same file.</li>
+                  <li>UI can match each OS (Glance timelines, WidgetKit families).</li>
+                </ul>
+              </div>
+              <div class="compare-block cons">
+                <h3><i class="ph ph-minus-circle" aria-hidden="true"></i> Cons</h3>
+                <ul>
+                  <li>Two UI codebases to maintain (Swift + Kotlin).</li>
+                  <li>Design parity is manual — you reimplement screens, not share them.</li>
+                  <li>Bug fixes can land on one platform before the other.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="widget-note">
+              <strong>Widget reality</strong>
+              Android Glance mirrors what you already do on iOS: fetch → cache → render recommendation. This is the path where “widget on the home screen” feels native, not bolted on.
+            </div>
+          </div>
+        </details>
+
+        <!-- Path 2: KMP -->
+        <details class="path">
+          <summary>
+            <div class="path-top">
+              <div>
+                <div class="path-rank">02 · share logic, not UI</div>
+                <h3 class="path-title">Kotlin Multiplatform</h3>
+              </div>
+              <i class="ph ph-caret-down chevron" aria-hidden="true"></i>
+            </div>
+            <div class="badge-row">
+              <span class="badge widget-strong">Widget: excellent</span>
+              <span class="badge">Shared models</span>
+            </div>
+            <p class="path-blurb">Rewrite shared parsing / recommendation logic in Kotlin Multiplatform. Keep native SwiftUI and Compose UIs + native widgets.</p>
+          </summary>
+          <div class="path-body">
+            <div class="compare">
+              <div class="compare-block pros">
+                <h3><i class="ph ph-plus-circle" aria-hidden="true"></i> Pros</h3>
+                <ul>
+                  <li>One place for JSON decode, stale rules, and snapshot building.</li>
+                  <li>Widgets stay fully native on both sides.</li>
+                  <li>Good long-term if Android becomes as important as iOS.</li>
+                </ul>
+              </div>
+              <div class="compare-block cons">
+                <h3><i class="ph ph-minus-circle" aria-hidden="true"></i> Cons</h3>
+                <ul>
+                  <li>You already have Swift shared models — KMP means a rewrite of that layer.</li>
+                  <li>More tooling / project setup than “just add Android.”</li>
+                  <li>UI and widgets are still written twice.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="widget-note">
+              <strong>Widget reality</strong>
+              Same widget quality as native twin. You only share the brain, not the home-screen shell. Worth it if logic drift between platforms starts to hurt.
+            </div>
+          </div>
+        </details>
+
+        <!-- Path 3: Flutter -->
+        <details class="path">
+          <summary>
+            <div class="path-top">
+              <div>
+                <div class="path-rank">03 · one UI kit</div>
+                <h3 class="path-title">Flutter</h3>
+              </div>
+              <i class="ph ph-caret-down chevron" aria-hidden="true"></i>
+            </div>
+            <div class="badge-row">
+              <span class="badge widget-mid">Widget: workable</span>
+              <span class="badge">Rewrite app UI</span>
+            </div>
+            <p class="path-blurb">One Dart UI for both phones. Home widgets still need native Android/iOS extensions (or community packages that wrap them).</p>
+          </summary>
+          <div class="path-body">
+            <div class="compare">
+              <div class="compare-block pros">
+                <h3><i class="ph ph-plus-circle" aria-hidden="true"></i> Pros</h3>
+                <ul>
+                  <li>Ship app screens once with strong visual control.</li>
+                  <li>Large ecosystem; fast iteration on in-app UI.</li>
+                  <li>Packages exist to talk to native home widgets.</li>
+                </ul>
+              </div>
+              <div class="compare-block cons">
+                <h3><i class="ph ph-minus-circle" aria-hidden="true"></i> Cons</h3>
+                <ul>
+                  <li>Throws away your current SwiftUI app surface.</li>
+                  <li>Widget is still a second, native-ish project — not “free” with Flutter.</li>
+                  <li>Apollo Utility / LCD look needs careful Flutter theming to match.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="widget-note">
+              <strong>Widget reality</strong>
+              Possible, but the hard part (timeline refresh, app-group / shared prefs, small layouts) stays platform-native. Flutter helps the app more than the widget.
+            </div>
+          </div>
+        </details>
+
+        <!-- Path 4: React Native -->
+        <details class="path">
+          <summary>
+            <div class="path-top">
+              <div>
+                <div class="path-rank">04 · JS team path</div>
+                <h3 class="path-title">React Native / Expo</h3>
+              </div>
+              <i class="ph ph-caret-down chevron" aria-hidden="true"></i>
+            </div>
+            <div class="badge-row">
+              <span class="badge widget-weak">Widget: weak</span>
+              <span class="badge">Config plugins</span>
+            </div>
+            <p class="path-blurb">Cross-platform app UI in React. Home-screen widgets need custom native modules; Expo support is limited.</p>
+          </summary>
+          <div class="path-body">
+            <div class="compare">
+              <div class="compare-block pros">
+                <h3><i class="ph ph-plus-circle" aria-hidden="true"></i> Pros</h3>
+                <ul>
+                  <li>Familiar if your team lives in JS/TS.</li>
+                  <li>Fine for settings screens and simple flows.</li>
+                  <li>Can still hit the same JSON endpoint.</li>
+                </ul>
+              </div>
+              <div class="compare-block cons">
+                <h3><i class="ph ph-minus-circle" aria-hidden="true"></i> Cons</h3>
+                <ul>
+                  <li>Home widgets are the pain point — exactly your priority.</li>
+                  <li>Often means ejecting / writing Swift + Kotlin beside RN anyway.</li>
+                  <li>You rewrite the iOS app you already have.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="widget-note">
+              <strong>Widget reality</strong>
+              Poor match for Liquid Gold. You’d build native widgets and a RN shell — more moving parts than native twin, worse widget story than Flutter or KMP.
+            </div>
+          </div>
+        </details>
+
+        <!-- Path 5: PWA -->
+        <details class="path">
+          <summary>
+            <div class="path-top">
+              <div>
+                <div class="path-rank">05 · web install</div>
+                <h3 class="path-title">PWA / TWA only</h3>
+              </div>
+              <i class="ph ph-caret-down chevron" aria-hidden="true"></i>
+            </div>
+            <div class="badge-row">
+              <span class="badge widget-weak">Widget: no</span>
+              <span class="badge">Skip for v1</span>
+            </div>
+            <p class="path-blurb">A website “Add to Home Screen.” Fast to prototype the idea — but not a real dual-platform widget product.</p>
+          </summary>
+          <div class="path-body">
+            <div class="compare">
+              <div class="compare-block pros">
+                <h3><i class="ph ph-plus-circle" aria-hidden="true"></i> Pros</h3>
+                <ul>
+                  <li>Fastest way to show the recommendation in a browser.</li>
+                  <li>One deploy; pipeline already publishes JSON.</li>
+                  <li>Useful as a temporary public page, not as the app.</li>
+                </ul>
+              </div>
+              <div class="compare-block cons">
+                <h3><i class="ph ph-minus-circle" aria-hidden="true"></i> Cons</h3>
+                <ul>
+                  <li>No proper iOS home-screen widget.</li>
+                  <li>Android web widgets are limited and inconsistent.</li>
+                  <li>Fails your “widget on the home screen” requirement.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="widget-note">
+              <strong>Widget reality</strong>
+              Do not pick this if the home-screen widget is a product pillar. Keep the web for status pages; keep the product native.
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================== -->
+    <!-- Honest recommendation                                                    -->
+    <!-- ====================================================================== -->
+    <section aria-labelledby="verdict-title">
+      <p class="eyebrow">
+        <i class="ph ph-target" aria-hidden="true"></i>
+        Recommendation
+      </p>
+      <h2 id="verdict-title">Ship Android native next to iOS</h2>
+
+      <div class="verdict-box">
+        <p>
+          Because the widget is the product surface, <strong>native twin</strong> is the least regretful move: keep LiquidGoldApple, add an Android app + Glance widget that consume the same <code>fuel-data.json</code>.
+        </p>
+        <p>
+          Revisit Kotlin Multiplatform later if shared Swift/Kotlin logic starts drifting. Skip RN/PWA for the client unless the widget requirement is dropped.
+        </p>
+
+        <ol class="next-steps" aria-label="Suggested order when you are ready">
+          <li><span>1</span> Mirror shared models + snapshot builder on Android.</li>
+          <li><span>2</span> Build the Glance home widget first (your real MVP).</li>
+          <li><span>3</span> Add the small settings app around it.</li>
+          <li><span>4</span> Only then consider KMP to dedupe logic.</li>
+        </ol>
+      </div>
+    </section>
+
+    <footer>
+      Preview only — no app work started.<br />
+      Open this file locally: <code>docs/mobile-options-preview.html</code>
+    </footer>
+
+  </div>
+
+  <script>
+    // Keep only one path open at a time on small screens — cleaner scan
+    (function () {
+      const paths = Array.from(document.querySelectorAll("details.path"));
+
+      paths.forEach((path) => {
+        path.addEventListener("toggle", () => {
+          if (!path.open) return;
+
+          paths.forEach((other) => {
+            if (other !== path) other.open = false;
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
